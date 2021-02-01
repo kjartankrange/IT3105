@@ -17,11 +17,17 @@ class Visualisation:
     #def update_board(self):
 
     def create_board(self, shape, size): ## function that creates nodes and edges.
+        if shape == "Triangle":
+            nodes, self.pos = self.create_nodes("Diamond", size) ## the graph needs a position parameter to display the board correctly
+            self.G.add_nodes_from(nodes) ## adding nodes
+            edges = self.create_edges(self.pos, "Diamond", self.spacing)
+            self.G.add_edges_from(edges) ## adding edges
+        elif shape == "Diamond":
+            nodes, self.pos = self.create_nodes("Diamond",size)  ## the graph needs a position parameter to display the board correctly
+            self.G.add_nodes_from(nodes)  ## adding nodes
+            edges = self.create_edges(self.pos, "Diamond", self.spacing)
+            self.G.add_edges_from(edges)  ## adding edges
 
-        nodes, self.pos = self.create_nodes("triangle", size) ## the graph needs a position parameter to display the board correctly
-        self.G.add_nodes_from(nodes) ## adding nodes
-        edges = self.create_edges(self.pos, "triangle", self.spacing)
-        self.G.add_edges_from(edges) ## adding edges
 
     def create_nodes(self, shape, size):
         pos = nx.spring_layout(self.G) ##creating a set position for every node.
@@ -29,12 +35,27 @@ class Visualisation:
         node_number = 1 ## creating a unique node-id
         nodes = []
         #setting the positions, include separate parts for triangle and diamond later on
-        for i in range(1, size + 1):
-            for j in range(size - i + 1):
-                pos[node_number] = [(5 * i) + 10 * j, 10 * i]
-                nodes.append(node_number)
-                node_number += 1
+        if shape == "Triangle":
+            for i in range(1, size + 1):
+                for j in range(size - i + 1):
+                    pos[node_number] = [(5 * i) + 10 * j, 10 * i]
+                    nodes.append(node_number)
+                    node_number += 1
+        elif shape == "Diamond":
+            print("hello")
+            for i in range(1,  size + 1):
+                for j in range(size - i + 1):
+                    pos[node_number] = [(5 * i) + 10 * j, 10 * (i)]
+                    nodes.append(node_number)
+                    node_number += 1
+            for i in range(1,  size):
+                for j in range(1,size - i + 1):
+                    pos[node_number] = [(5*(i- 1)) + 10 * j, -10 * (i- 1) ] #need some comments here presumably
+                    nodes.append(node_number)
+                    node_number += 1
+            print(pos)
         return nodes, pos
+
 
 
 
@@ -61,8 +82,8 @@ class Visualisation:
 ## Just testing the visualisation of the code
 
 
-nummer1 = Visualisation( "rectangle",4)
-nummer1.create_board( "rectangle",4)
+nummer1 = Visualisation( "Diamond",4)
+nummer1.create_board( "Diamond",4)
 
 
 
