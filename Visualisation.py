@@ -17,16 +17,11 @@ class Visualisation:
     #def update_board(self):
 
     def create_board(self, shape, size): ## function that creates nodes and edges.
-        if shape == "Triangle":
-            nodes, self.pos = self.create_nodes("Diamond", size) ## the graph needs a position parameter to display the board correctly
-            self.G.add_nodes_from(nodes) ## adding nodes
-            edges = self.create_edges(self.pos, "Diamond", self.spacing)
-            self.G.add_edges_from(edges) ## adding edges
-        elif shape == "Diamond":
-            nodes, self.pos = self.create_nodes("Diamond",size)  ## the graph needs a position parameter to display the board correctly
-            self.G.add_nodes_from(nodes)  ## adding nodes
-            edges = self.create_edges(self.pos, "Diamond", self.spacing)
-            self.G.add_edges_from(edges)  ## adding edges
+
+        nodes, self.pos = self.create_nodes(shape, size) ## the graph needs a position parameter to display the board correctly
+        self.G.add_nodes_from(nodes) ## adding nodes
+        edges = self.create_edges(self.pos, shape, self.spacing)
+        self.G.add_edges_from(edges) ## adding edges
 
 
     def create_nodes(self, shape, size):
@@ -82,8 +77,8 @@ class Visualisation:
 ## Just testing the visualisation of the code
 
 
-nummer1 = Visualisation( "Diamond",4)
-nummer1.create_board( "Diamond",4)
+nummer1 = Visualisation( "Triangle",4)
+nummer1.create_board( "Triangle",4)
 
 
 
