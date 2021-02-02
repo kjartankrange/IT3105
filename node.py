@@ -1,18 +1,17 @@
 class Node: 
     
-    def __init__(self,alive,pos_x,pos_y): 
+    def __init__(self,alive): 
         self.alive = alive
-        self.neighbours = {"NE","NW","SE","SW","E","W"}
-        self.double_neighbours = {"N","NE","NW","S","SE","SW","E","W"}
-        self.pos_x = pos_x
-        self.pos_y = pos_y
+        self.neighbours = dict.fromkeys(["NE","NW","SE","SW","E","W"])
+        self.double_neighbours = dict.fromkeys(["NE","NW","SE","SW","E","W"])
+
         
     def add_neighbour(self,node,pos):
         if node in self.neighbours.keys():
             raise Exception("Node is already a neighbour")
         self.neighbours[pos] = node  
    
-   def add_double_neighbour(slef,node,pos):
+    def add_double_neighbour(slef,node,pos):
         if node in self.neighbours.values() or node in self.double_neighbours.values():
             raise Exception("Node is already a double_neighbour")
         self.double_neighbours[pos] = node
