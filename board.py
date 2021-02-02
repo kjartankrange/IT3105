@@ -6,21 +6,20 @@ def make_triangle(size,node): #Helperfunction
     return lst
 
 class  Board: 
-   
-
-
-    def __init__(self,type,size): 
-        if (type == "t" and (size not in [4,5,6,7,8]) or type == "d" and (size not in [3,4,5,6]) ):
+    def __init__(self,shape,size): 
+        if (shape == "t" and (size not in [4,5,6,7,8]) or shape == "d" and (size not in [3,4,5,6]) ):
             return "wrong initialization" 
         node = 1
         
-        if type == "t":
+        if shape == "t":
+            self.shape = shape
             self.board = make_triangle(size,node)
         
-        elif type == "d":
+        elif shape == "d":
             lst = make_triangle(size,node)
             lst.append(make_triangle(size,node)[:-1][::-1]) #trim of mid part and flip list on head
             self.board = lst
+    
 
 
 #t4 = Board("t",4)
