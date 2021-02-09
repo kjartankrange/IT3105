@@ -93,6 +93,13 @@ nx.draw(
 plt.show()
 
 
+lis = []
+lis2 = ["halla"]
+lis2.append(lis)
+print(lis2)
+lis2.insert(0,lis)
+lis3 = lis + lis2
+print(lis2,lis3, sep="\n")
 
 
 
