@@ -88,12 +88,11 @@ class  Board:
         for touple in dead_pos_touples:
             self.board[touple[0]] [touple[1]] .kill()
 
-
-    def __init__(self,board,move):
          
-
+    """
     def node_at(touple):
         return self.board[touple[0]][touple[1]]   
+    """
    
     """
     def moves_board_score():

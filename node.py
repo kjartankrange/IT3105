@@ -11,7 +11,7 @@ class Node:
             raise Exception("Node is already a neighbour")
         self.neighbours[pos] = node  
    
-    def add_double_neighbour(slef,node,pos):
+    def add_double_neighbour(self,node,pos):
         if node in self.neighbours.values() or node in self.double_neighbours.values():
             raise Exception("Node is already a double_neighbour")
         self.double_neighbours[pos] = node
