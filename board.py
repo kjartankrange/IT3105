@@ -90,7 +90,7 @@ class  Board:
 
 
     def __init__(self,board,move):
-        
+         
 
     def node_at(touple):
         return self.board[touple[0]][touple[1]]   
