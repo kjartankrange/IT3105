@@ -1,0 +1,1 @@
+This is our peg solitaire artificial intelligence project.
