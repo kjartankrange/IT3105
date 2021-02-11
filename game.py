@@ -15,17 +15,24 @@ def check_game_over(board): #returns if board is still playing, won, lost
 
 def main():
 
-  shape,size,dead_pos = "t", 3, [(1,0)]
+  shape,size,dead_pos = "t", 4, [(1,0)]
   board = Board(shape,size,dead_pos)
   #vis = Visualisation(board)
   while not check_game_over(board):
     moves = board.get_available_moves()
 
     m = random.choice((moves))
-    print(m)
+    #print(m)
+    input("press enter for play: ")
 
-    move = board.move(m)
-    print(board.get_available_moves())
+
+    board.move(m)
+    #print(board.get_available_moves())
+
+    for line in board.board: 
+        for node in line:
+            print(node.alive,end="")
+        print()
 
     #vis.make_dead(move)
     #show = vis.visualise()

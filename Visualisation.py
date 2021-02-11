@@ -36,7 +36,7 @@ class Visualisation:
         nodes = []
         #setting the positions, include separate parts for triangle and diamond later on
         if shape == ("t"):
-            print("Hello")
+            
             for i in range(1, size + 1):
                 for j in range(size - i + 1):
                     pos[node_number] = [(5 * i) + 10 * j, 10 * i]
@@ -44,7 +44,7 @@ class Visualisation:
                     node_number += 1
                     self.color_map.append("black")
         elif shape == "d":
-            print("hello")
+            
             for i in range(1,  size + 1):
                 for j in range(size - i + 1):
                     pos[node_number] = [(5 * i) + 10 * j, 10 * (i)]
@@ -93,7 +93,7 @@ class Visualisation:
         for row in status:
             for node in range(len(row)-1, -1, -1):
                 formatted_list.insert(0,row[node])
-                print(formatted_list[0].is_alive())
+                #print(formatted_list[0].is_alive())
         return formatted_list
 
 

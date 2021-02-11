@@ -189,13 +189,13 @@ class  Board:
 
 
     
-
+"""
 
 t4 = Board("t",4, [(1,0)] )
 t4.find_alive_nodes()
 vis = Visualisation(t4)
 show = vis.visualise()
-print(t4.get_available_moves())
+#print(t4.get_available_moves())
 plt.show()
 
 
@@ -218,3 +218,4 @@ plt.show()
 
 #d5 = Board("d",5,[0,1])
 #print(d5.board)
+"""
