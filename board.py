@@ -149,7 +149,7 @@ class  Board:
         node_to_move.kill()
         neighbour.kill()
         double_neighbour.resurrect()
-        return self.get_nodes()
+        return self.get_board()
 
     def get_board(self):
         return self.board
@@ -178,7 +178,8 @@ plt.show()
 
 
 
-t4.move((9, "NW"))
+move = t4.move((9, "NW"))
+vis.make_dead(move)
 show = vis.visualise()
 plt.show()
 
