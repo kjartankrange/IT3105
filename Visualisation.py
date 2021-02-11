@@ -5,14 +5,19 @@ import numpy as np
 
 
 
+
 class Visualisation:
 
     G = nx.Graph()
     spacing = 10 ## should be available to update
+    color_map = []
+    pos = []
 
-    def __init__(self, shape, size): ## add functionality for shapes later
+    def __init__(self, shape, size, node_status): ## add functionality for shapes later
         self.shape = shape
         self.size = size
+        self.create_board(shape,size)
+        self.make_dead(node_status)
 
     #def update_board(self):
 
@@ -31,11 +36,13 @@ class Visualisation:
         nodes = []
         #setting the positions, include separate parts for triangle and diamond later on
         if shape == "Triangle":
+            print("Hello")
             for i in range(1, size + 1):
                 for j in range(size - i + 1):
                     pos[node_number] = [(5 * i) + 10 * j, 10 * i]
                     nodes.append(node_number)
                     node_number += 1
+                    self.color_map.append("black")
         elif shape == "Diamond":
             print("hello")
             for i in range(1,  size + 1):
@@ -43,16 +50,15 @@ class Visualisation:
                     pos[node_number] = [(5 * i) + 10 * j, 10 * (i)]
                     nodes.append(node_number)
                     node_number += 1
+                    color_map.append("black")
             for i in range(1,  size):
                 for j in range(1,size - i + 1):
                     pos[node_number] = [(5*(i- 1)) + 10 * j, -10 * (i- 1) ] #need some comments here presumably
                     nodes.append(node_number)
                     node_number += 1
-            print(pos)
+                    color_map.append("black")
+            self.color_map = color_map
         return nodes, pos
-
-
-
 
 
     def create_edges(self, pos, shape, distance): ## helper function for returning neighbours as list
@@ -70,36 +76,34 @@ class Visualisation:
         distance_vector = [u[0] - v[0], u[1]- v[1]]
         return np.linalg.norm(distance_vector)
 
+    def make_dead(self, status): ## input is a board, which is a list populated with nodes
+
+        status = self.format_board(status)
+
+        for i in range(len(status)):
+            if status[i].is_alive() == 0:
+                self.color_map[i] = "Lightgrey"
+            elif status[i].is_alive() == 1:
+                self.color_map[i] = "Black"
+
+    #Get a list
+    def format_board(self, status):
+        formatted_list = []
+        print(status)
+        for row in status:
+            for node in range(len(row)-1, -1, -1):
+                formatted_list.insert(0,row[node])
+                print(formatted_list[0].is_alive())
+        return formatted_list
 
 
+    def visualise(self):
 
+        return nx.draw(self.G, self.pos,
+                node_size= 700,
+                node_color = self.color_map
+                )
 
-## Just testing the visualisation of the code
-
-
-nummer1 = Visualisation( "Triangle",4)
-nummer1.create_board( "Triangle",4)
-
-
-
-nx.draw(
-    nummer1.G,
-    nummer1.pos,
-    node_size=700,
-    node_color = "red",
-    #labels={node:node for node in nummer1.G.nodes()}
-)
-
-plt.show()
-
-
-lis = []
-lis2 = ["halla"]
-lis2.append(lis)
-print(lis2)
-lis2.insert(0,lis)
-lis3 = lis + lis2
-print(lis2,lis3, sep="\n")
 
 
 

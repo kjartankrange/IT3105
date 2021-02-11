@@ -1,21 +1,25 @@
 from node import * 
 import copy
+from node import *
+from Visualisation import *
 
 def make_triangle(size): #Helperfunction
     lst = []
+    node_counter = 1
     for i in range(1,size+1):
         row = []
         for j in range(i):
-            row.append(Node(1))
+            row.append(Node(1,node_counter))
+            node_counter += 1
         lst.append(row)
     return lst
 
 class  Board:
 
-
-    def __init__(self,shape,size,dead_pos_touples, isUpdate = False, move = None):
+        ## del opp i hjelpefunksjoner: make_board(), set_neighbours, set_doubleneighbours()
+    def __init__(self,shape,size,dead_pos_touples):
         self.board = []
-        self.node_count = 0
+        self.node_count = 0                        ## skjønner ikke helt hvorfor vi trenger en node count. Gjør dn at det går kjappere?
         
 
         if shape == "t" and (size not in range(4,9)) or shape == "d" and (size not in range(3,7)):
@@ -64,7 +68,6 @@ class  Board:
                 increase = 1 if shape == "t" else -1
 
             for j in range(len(self.board[i])):
-                print(self.board[i][j])
                 self.board[i][j].neighbours["W"] =  board_copy[i+2][j+2-1]
                 self.board[i][j].neighbours["E"] =  board_copy[i+2][j+2+1]
                 if increase == 1:
@@ -96,74 +99,89 @@ class  Board:
             x,y = touple
             self.board[touple[0]] [touple[1]] .kill()
 
-<<<<<<< Updated upstream
+
+    def get_nodes(self):  ## returns an array with the nodes in the board.
+        nodes = []
+        for row in self.board:
+            for column in range(len(row)):
+                nodes.append(row[column])
+        return nodes
+
+    def find_dead_nodes(self): #helper function for finding dead nodes. Returns the id of the nodes as a list
+        nodes = self.get_nodes()
+        dead_nodes = []
+        for i in range(len(nodes)):
+            if nodes[i].is_alive() == 0:
+                dead_nodes.append(nodes[i])
+        return dead_nodes
+
+    def get_available_moves(self): #moves should be on form [Node, move_direction]
+        ## We must concentrate on the dead nodes. Double neighbours can jump over neighbours,
+        ## if the neighbour is alive.
+
+
+        #find dead nodes, find their neighbours. if neighbours are alive and they have
+        #double neighbours in same direction and double neighbour is alive, add to list
+        moves = [] #moves on form {node_id : direction (from dead_node)}
+        dead_nodes = self.find_dead_nodes()
+        for node in dead_nodes:
+            neighbours = node.get_neighbours()
+            double_neighbours = node.get_double_neighbours()
+            for neighbour in neighbours.items():
+                if neighbour[1] is None:
+                    continue
+                if neighbour[0] in double_neighbours and neighbour[1].is_alive() and double_neighbours[neighbour[0]] is not None and double_neighbours[neighbour[0]].is_alive():
+                    move = {}
+                    id = double_neighbours[neighbour[0]].get_id()##id
+                    direction = neighbour[0]##direction
+                    move[id] = direction
+                    moves.append(move)
+        return moves
+
+    def move(self, move):  # move on form (id, direction)
+        nodes = self.get_nodes()
+        id, dir = move
+        node_to_move = nodes[id - 1]
+        neighbours = node_to_move.get_neighbours()
+        neighbour = neighbours[dir]
+        double_neighbours = node_to_move.get_double_neighbours()
+        double_neighbour = double_neighbours[dir]
+        node_to_move.kill()
+        neighbour.kill()
+        double_neighbour.resurrect()
+        return self.get_nodes()
+
+    def get_board(self):
+        return self.board
+
+
          
-    """
-=======
-        if(isUpdate and move is not None):
-
-            self.node_count -= 1
-            original_x, original_y = move[0]  ##list with x_position and y_position
-            original_node = self.board[original_x][original_y]
-            double_neighbours_original = original_node.get_double_neighbours()
-            new_node = double_neighbours_original[move[1]]  # find the correct double neighbour using sky direction
-            original_node.kill()
-            new_node.resurrect()
-            original_node.get_neighbours()[move[1]].kill()
 
 
 
 
 
 
-    def is_legal_move(self,move): #move on format ([x_pos,y_pos], "Sky direction")
-        if len(move) != 2:
-            return False
-        pos = move[0]
-        if len(pos) != 2:
-            return False
-        x_pos, y_pos = pos
-        sky_dir = move[1]
-        if self.board[x_pos][y_pos].alive != 1:
-            return False
-        print(self.board[x_pos][y_pos])
-        new_node = self.board[x_pos][y_pos].get_double_neighbours()[sky_dir]
-        if new_node.alive != 0:
-            return False
-        jump_node = self.board[x_pos][y_pos].get_neighbours()[sky_dir]
-        if jump_node != 1:
-            return False
-        return True
 
 
-        
 
->>>>>>> Stashed changes
-    def node_at(touple):
-        return self.board[touple[0]][touple[1]]   
-    """
-   
-    """
-    def moves_board_score():
-        pass
-    """
-    """def legal_moves():
-        for lst in self.board:
-            pass
-        pass"""
 
-    """def score():
-        return (not self.legal_moves()) or (self.node_count == 1
-        return (not self.legal_moves())*( (self.node_count ==1) - 1)"""
 
-    
-   
-        
-    
     
 
 
-t4 = Board("d",4, [(1,0)])
+t4 = Board("t",4, [(1,0)] )
+vis = Visualisation("Triangle", 4, t4.get_board())
+show = vis.visualise()
+print(t4.get_available_moves())
+plt.show()
+
+
+
+t4.move((9, "NW"))
+show = vis.visualise()
+plt.show()
+
 
 
 #print(t4.board[3][3].neighbours)
@@ -171,12 +189,8 @@ t4 = Board("d",4, [(1,0)])
 #print(t4.board[0][0].double_neighbours)
 
 
-count = 0
-for row in t4.board:
-    print()
-    for node in row:
-        print(node.alive, end = "")
-print(t4.board[6][0].neighbours)
+
+#print(t4.board[6][0].neighbours)
 
 
 #d5 = Board("d",5,[0,1])
