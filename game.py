@@ -17,26 +17,28 @@ def main():
 
   shape,size,dead_pos = "t", 4, [(1,0)]
   board = Board(shape,size,dead_pos)
-  #vis = Visualisation(board)
+  vis = Visualisation(board)
   while not check_game_over(board):
     moves = board.get_available_moves()
 
     m = random.choice((moves))
+
     #print(m)
     input("press enter for play: ")
 
 
-    board.move(m)
+
+    move = board.move(m)
     #print(board.get_available_moves())
 
-    for line in board.board: 
+    for line in board.board:
         for node in line:
             print(node.alive,end="")
         print()
 
-    #vis.make_dead(move)
-    #show = vis.visualise()
-    #plt.show()
+    vis.make_dead(move)
+    show = vis.visualise()
+    plt.show()
 
 main()
 

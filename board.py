@@ -27,7 +27,7 @@ class  Board:
         
 
         if shape == "t" and (size not in range(4,9)) or shape == "d" and (size not in range(3,7)):
-            return "wrong initialization" 
+            print( "wrong initialization")
         self.shape = shape
         
         if shape == "t":

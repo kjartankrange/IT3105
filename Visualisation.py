@@ -89,7 +89,6 @@ class Visualisation:
     #Get a list
     def format_board(self, status):
         formatted_list = []
-        print(status)
         for row in status:
             for node in range(len(row)-1, -1, -1):
                 formatted_list.insert(0,row[node])
