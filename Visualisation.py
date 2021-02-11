@@ -13,11 +13,11 @@ class Visualisation:
     color_map = []
     pos = []
 
-    def __init__(self, shape, size, node_status): ## add functionality for shapes later
-        self.shape = shape
-        self.size = size
-        self.create_board(shape,size)
-        self.make_dead(node_status)
+    def __init__(self, board): ## add functionality for shapes later
+        self.shape = board.get_shape()
+        self.size = board.get_size()
+        self.create_board(self.shape, self.size)
+        self.make_dead(board.get_board())
 
     #def update_board(self):
 
@@ -35,7 +35,7 @@ class Visualisation:
         node_number = 1 ## creating a unique node-id
         nodes = []
         #setting the positions, include separate parts for triangle and diamond later on
-        if shape == "Triangle":
+        if shape == ("t"):
             print("Hello")
             for i in range(1, size + 1):
                 for j in range(size - i + 1):
@@ -43,7 +43,7 @@ class Visualisation:
                     nodes.append(node_number)
                     node_number += 1
                     self.color_map.append("black")
-        elif shape == "Diamond":
+        elif shape == "d":
             print("hello")
             for i in range(1,  size + 1):
                 for j in range(size - i + 1):

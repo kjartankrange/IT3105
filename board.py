@@ -14,12 +14,16 @@ def make_triangle(size): #Helperfunction
         lst.append(row)
     return lst
 
+
+
 class  Board:
+    opposite_directions = {"NE": "SW", "NW": "SE", "SW": "NE", "SE": "NW", "E": "W", "W": "E"}
 
         ## del opp i hjelpefunksjoner: make_board(), set_neighbours, set_doubleneighbours()
     def __init__(self,shape,size,dead_pos_touples):
         self.board = []
-        self.node_count = 0                        ## skjønner ikke helt hvorfor vi trenger en node count. Gjør dn at det går kjappere?
+        self.node_count = 0
+        self.size = size
         
 
         if shape == "t" and (size not in range(4,9)) or shape == "d" and (size not in range(3,7)):
@@ -115,6 +119,15 @@ class  Board:
                 dead_nodes.append(nodes[i])
         return dead_nodes
 
+    def find_alive_nodes(self):
+        dead_nodes = self.find_dead_nodes()
+        alive_nodes = []
+        nodes = self.get_nodes()
+        for node in nodes:
+            if node not in dead_nodes:  # should maybe be checked by id?
+                alive_nodes.append(node)
+        return alive_nodes
+
     def get_available_moves(self): #moves should be on form [Node, move_direction]
         ## We must concentrate on the dead nodes. Double neighbours can jump over neighbours,
         ## if the neighbour is alive.
@@ -131,11 +144,12 @@ class  Board:
                 if neighbour[1] is None:
                     continue
                 if neighbour[0] in double_neighbours and neighbour[1].is_alive() and double_neighbours[neighbour[0]] is not None and double_neighbours[neighbour[0]].is_alive():
-                    move = {}
+
+
                     id = double_neighbours[neighbour[0]].get_id()##id
-                    direction = neighbour[0]##direction
-                    move[id] = direction
-                    moves.append(move)
+                    opposite_dir = neighbour[0]
+                    direction = self.opposite_directions[opposite_dir]##direction
+                    moves.append((id, direction))
         return moves
 
     def move(self, move):  # move on form (id, direction)
@@ -149,10 +163,17 @@ class  Board:
         node_to_move.kill()
         neighbour.kill()
         double_neighbour.resurrect()
+        self.node_count -= 1
         return self.get_board()
 
     def get_board(self):
         return self.board
+
+    def get_shape(self):
+        return self.shape
+
+    def get_size(self):
+        return self.size
 
 
          
@@ -171,7 +192,8 @@ class  Board:
 
 
 t4 = Board("t",4, [(1,0)] )
-vis = Visualisation("Triangle", 4, t4.get_board())
+t4.find_alive_nodes()
+vis = Visualisation(t4)
 show = vis.visualise()
 print(t4.get_available_moves())
 plt.show()
