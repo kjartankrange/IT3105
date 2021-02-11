@@ -67,7 +67,7 @@ class  Board:
         
         for i in range(len(self.board)):
             try: 
-                increase = len(board[i+1]) -  len(board[i]) #finner halvdel av diamant
+                increase = len(self.board[i+1]) -  len(self.board[i]) #finner halvdel av diamant
             except: 
                 increase = 1 if shape == "t" else -1
 
