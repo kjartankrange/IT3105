@@ -164,7 +164,7 @@ class  Board:
         neighbour.kill()
         double_neighbour.resurrect()
         self.node_count -= 1
-        return self.get_board()
+        return self
 
     def get_board(self):
         return self.board
@@ -174,6 +174,13 @@ class  Board:
 
     def get_size(self):
         return self.size
+
+    def state(self):
+        string = ""
+        for line in self.board:
+            for node in line:
+                string += str(node.alive)
+        return string
 
 
          
