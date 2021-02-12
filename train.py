@@ -7,7 +7,7 @@ def train(starting_state, gamma, delta, alpha_a, alpha_c, lamda): #pseudocode pa
     
     policy = {} #mapping from state to action
     
-
+    episodes = [0,0,0,0,0,0,0,0,0]
     for episode in episodes: #iterate through all episodes
         eligibilities = {}
         eligibilities_critic = {}
