@@ -2,29 +2,45 @@ from random import *
 import math
 
 
-def train(starting_state): #pseudocode page 9
+def train(starting_state, gamma, delta, alpha_a, alpha_c, lamda): #pseudocode page 9
     values = {starting_state: random.random()*0.1}
     
     policy = {} #mapping from state to action
+    
 
     for episode in episodes: #iterate through all episodes
+        eligibilities = {}
+        eligibilities_critic = {}
         actions = starting_state.get_available_moves() #get possible moves
         state = starting_state
         for action in actions: #iterate through moves
             policy[(state, action)] = 0
         action_s = [] 
         
+        SAP = [()]
         
         for t in episode:
-            state.move(boltzmann_scaling_choice(state, policy)) #pick move from distribution
-            boltzmann_scaling_choice(s)
+            last_action = boltzmann_scaling_choice(t, policy) #pick move from distribution
+            last_state = t.state
+            SAP.append((last_state, last_action))
+            t.move(action) 
+            eligibilities[t, action] = 1
+            delta = t.check_game_score() + gamma*values[t.state]-values[last_state]
+            eligibilities_critic[last_state]=1
+        
+            for tup in SAP:
+                values[tup[0]] += alpha_c*delta*eligibilities_critic[tup[0]]
+                eligibilities_critic[tup[0]] = gamma*lamda*eligibilities_critic[tup[0]]
+                policy[tup]=policy[tup] + alpha_a*delta*eligibilities[tup]
+                eligibilities[tup] = gamma*lamda*eligibilities[tup]
+            
+            if t.check_game_score!=0:
+                break
 
-        """
-        eligibilities = 1
-        if starting_state != previous_state:
-            eligibilites = gamma delta eligibilites
-        """
-    
+            state = last_state
+            action = last_action
+            
+
 def boltzmann_scaling_choice(state, policy):
     actions = state.get_available_moves()
     weights = []
@@ -42,4 +58,3 @@ def boltzmann_scaling_choice(state, policy):
     return draw
 
 
-#def eligibiilteis
