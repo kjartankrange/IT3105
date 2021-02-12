@@ -4,7 +4,7 @@ import random
 
 
 
-def check_game_over(board): #returns if board is still playing, won, lost
+def check_game_score(board): #returns if board is still playing, won, lost
     if len(board.get_available_moves())!=0:
         return 0 #game is not over
     elif board.node_count==1:
@@ -18,7 +18,7 @@ def main():
   shape,size,dead_pos = "t", 4, [(1,0)]
   board = Board(shape,size,dead_pos)
   vis = Visualisation(board)
-  while not check_game_over(board):
+  while not check_game_score(board):
     moves = board.get_available_moves()
 
     m = random.choice((moves))
