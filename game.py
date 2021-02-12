@@ -1,6 +1,26 @@
 from board import *
 from Visualisation import *
 import random
+from copy import deepcopy
+
+
+
+
+
+def find_new_states(board, actions):
+    states = {}
+    for action in actions:
+        new_state = result_function(board, action)
+        states[action] = new_state
+    print(states)
+    return states
+
+
+def result_function( board, action):
+    cop = copy.deepcopy(board)
+    new_state = cop.move(action)
+
+    return new_state
 
 
 
@@ -15,32 +35,57 @@ def check_game_score(board): #returns if board is still playing, won, lost
 
 def main():
 
-  shape,size,dead_pos = "t", 4, [(1,0)]
+  shape,size,dead_pos = "t", 4, [(2,1),(2,2)]
   board = Board(shape,size,dead_pos)
+<<<<<<< Updated upstream
   vis = Visualisation(board)
   while not check_game_score(board):
     moves = board.get_available_moves()
+=======
+  #vis = Visualisation(board)
+  #show = vis.visualise()
+  #plt.show()
+  boards = []
+  while not check_game_over(board):
+      moves = board.get_available_moves()
+      states = find_new_states(board, moves)
+   # for board in states:
+    #    for line in board.board:
+     #       for node in line:
+      #          print(node.alive, end="")
+       #     print()
+      m = random.choice((moves))
+>>>>>>> Stashed changes
 
-    m = random.choice((moves))
 
     #print(m)
-    input("press enter for play: ")
+      input("press enter for play: ")
 
 
-
-    move = board.move(m)
+      board = board.move(m)
+      score = check_game_over(board)
+      boards.append((states[m], score))
+  for board in boards:
+      print(board[0].state())
+      print("score = " , board[1])
     #print(board.get_available_moves())
 
-    for line in board.board:
-        for node in line:
-            print(node.alive,end="")
-        print()
+    #for line in board.board:
+     #   for node in line:
+      #      print(node.alive,end="")
+       # print()
 
-    vis.make_dead(move)
-    show = vis.visualise()
-    plt.show()
-
+    #vis.make_dead(move)
+    #show = vis.visualise()
+    #plt.show()
 main()
+
+
+#shape,size,dead_pos = "t", 4, [(2,2)]
+#board = Board(shape,size,dead_pos)
+#actions = board.get_available_moves()
+#new_states = find_new_states(board,actions)
+#print(new_states)
 
 
 
