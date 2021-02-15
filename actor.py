@@ -42,11 +42,11 @@ class Actor:
         actions_values = {} # actions from a given state, on form {(state, dir), value }
         for action in actions:
             sap = (state, action)
-            action_values[sap] = self.get_policy(sap)
+            actions_values[sap] = self.get_policy(sap)
         if len(actions_values) > 0 : #we must have some possible actions
             if random.random() < epsilon:
-                return random.choice(list(action_values.keys()))[1]
-            return max(actions_values.iterkeys(), key=(lambda x: actions_values[x]))
+                return random.choice(list(actions_values.keys()))[1]
+            return max(actions_values.keys(), key=(lambda x: actions_values[x]))[1]
 
 
 
