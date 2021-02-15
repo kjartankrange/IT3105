@@ -1,5 +1,6 @@
 from random import *
 import math
+from actor import Actor
 from board import *
 from game import *
 from actor import *
@@ -11,6 +12,16 @@ class Player :
         self.critic = critic,
         self.board = board
         self.no_episodes = no_episodes
+        
+        if self.critic == 0: # use criticTable
+            from critic import TableCritic
+            self.critic = TableCritic(alpha_c, lamda, gamma)
+        else: # use criticNN
+            from neural_net import NeuralNetCritic
+            state = board.state()
+            inputLayerSize = len(state)
+            self.critic = NeuralNetCritic(alpha_c, lamda, gamma, hiddenLayerSizes, inputLayerSize)
+
         #make visualisation later.
 
 
@@ -65,6 +76,24 @@ class Player :
             weights[i] = weights[i]/sum1
         draw = random.choices(actions, distribution, k=1)
         return draw[0]
+
+            
+
+def boltzmann_scaling_choice(state, policy): #Make a weighted choice on policy
+    actions = state.get_available_moves()
+    weights = []
+    distribution = []
+    sum1 = 0
+    for action in actions:
+        ai = math.e**(policy[(state, action)])
+        weights.append(ai)
+        distribution.append(ai)
+        sum1 = ai
+    for i in range(len(weights)):
+        weights[i] = weights[i]/sum1
+    draw = random.choices(actions, distribution, k=1)
+
+    return draw
 
 
 

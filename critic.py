@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from random import *
 
 
-class TableCritic():
+class TableCritic(alpha_c, lamda, gamma):
     
     def __init__(learning_rate, discount_factor, trace_decay_factor):
         return
