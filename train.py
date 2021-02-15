@@ -69,8 +69,7 @@ class Player:
         plt.show()
             
         fig, ax = plt.subplots()
-        ax.plot(x_axis, plot_data, 'ro')
-        print(plot_data)
+        ax.plot(x_axis, plot_data)
         
         ax.set(xlabel='Episode', ylabel='Amount of pegs',
         title='Test')
@@ -81,7 +80,7 @@ class Player:
 
 
 
-starting_state = Board("t",4,[(2,2)])
+starting_state = Board("d",4,[(3,1)])
 gamma = 0.9
 alpha_a = 0.7
 alpha_c = 0.1
@@ -89,7 +88,7 @@ lamda = 0.8
 critic = 0 # 0 is table critic, 1 is NN
 eps = 1
 eps_deg = 0.99
-rounds = 1000
+rounds = 9000
 
 actor = Actor()
 
