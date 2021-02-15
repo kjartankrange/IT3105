@@ -55,4 +55,4 @@ def main(): # running the game with random moves.
         show = vis.visualise()
         plt.show()
 
-main()
+#main()

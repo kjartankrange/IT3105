@@ -169,7 +169,7 @@ class Board:
     def check_game_score(self): #returns if board is still playing, won, lost
         if len(self.get_available_moves())!=0:
             return 0 #game is not over
-        elif board.node_count==1:
+        elif self.node_count==1:
             return 1 #game is won
         else:
             return -1 #game is lost
