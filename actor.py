@@ -22,11 +22,11 @@ class Actor:
             self.eligibilities[state_action_tup] = random.random()*0.01
         return self.eligibilities[state_action_tup]
             
-    def update_eligibilities(self,state_action_tup,gamma,delta):
+    def update_eligibilities(self,state_action_tup,gamma,l):
         self.eligibilities[state_action_tup] = 1
         for key in self.eligibilities.keys():
             if key != state_action_tup:
-                self.eligibilities[key] = self.eligibilities[key]*gamma*delta
+                self.eligibilities[key] = self.eligibilities[key]*gamma*l
 
     def get_policy(self,state_action_tup):
         if state_action_tup not in self.policy.keys():

@@ -170,9 +170,9 @@ class Board:
         if len(self.get_available_moves())!=0:
             return 0 #game is not over
         elif self.node_count==1:
-            return 1 #game is won
+            return 100 #game is won
         else:
-            return -1 #game is lost
+            return -100 #game is lost
 
     def move(self, move):  # input: move on form (id, direction). Returns a board object iwth the applied move.
         nodes = self.get_nodes()

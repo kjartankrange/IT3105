@@ -10,11 +10,10 @@ import numpy as np
 
 class Player:
 
-    def __init__(self, actor, critic, board, no_episodes):
+    def __init__(self, actor, critic, board):
         self.actor = actor
         self.critic = critic
         self.board = board
-        self.no_episodes = no_episodes
         
     """
         if self.critic == 0: # use TableCritic
@@ -51,25 +50,27 @@ class Player:
                     values[s_prime] = random.random()
 
                 delta = t.check_game_score() + gamma * values[s_prime] - values[s]
-                eligibilities_critic[s] = 1
+                if s not in eligibilities_critic.keys():
+                    eligibilities_critic[s] = 1
 
                 for tup in SAP:
                     values[tup[0]] += alpha_c * delta * eligibilities_critic[tup[0]]
                     eligibilities_critic[tup[0]] = gamma * l * eligibilities_critic[tup[0]]
                     policy = actor.get_policy(tup) + alpha_a * delta * actor.get_eligibilities(tup)
                     actor.set_policy((s, action), policy)
-                    actor.update_eligibilities(tup, gamma, delta)
+                    actor.update_eligibilities(tup, gamma, l)
                 s = s_prime
-                epsilon *= epsilon_deg
+            epsilon *= epsilon_deg
             plot_data.append(len(t.find_alive_nodes()))
             x_axis.append(x)
 
-        #vis = Visualisation(t)
-        #show = vis.visualise()
-        #plt.show()
+        vis = Visualisation(t)
+        show = vis.visualise()
+        plt.show()
             
         fig, ax = plt.subplots()
-        ax.plot(x_axis, plot_data)
+        ax.plot(x_axis, plot_data, 'ro')
+        print(plot_data)
         
         ax.set(xlabel='Episode', ylabel='Amount of pegs',
         title='Test')
@@ -82,12 +83,18 @@ class Player:
 
 starting_state = Board("t",4,[(2,2)])
 gamma = 0.9
-alpha_a = 0.1
+alpha_a = 0.7
 alpha_c = 0.1
-lamda = 0.5 
+lamda = 0.8
 critic = 0 # 0 is table critic, 1 is NN
+eps = 1
+eps_deg = 0.99
+rounds = 1000
 
 actor = Actor()
-player = Player (actor, None , starting_state, 1000)
-player.train(starting_state,gamma,alpha_a,alpha_c,lamda , 1.0, 0.9, 1000)
+
+
+player = Player (actor, None , starting_state)
+player.train(starting_state,gamma,alpha_a,alpha_c,lamda , eps, eps_deg, rounds)
+
 
