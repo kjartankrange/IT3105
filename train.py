@@ -5,23 +5,24 @@ from board import *
 from game import *
 from actor import *
 
-class Player :
+class Player:
 
     def __init__(self, actor, critic, board, no_episodes):
-        self.actor = actor,
-        self.critic = critic,
+        self.actor = actor
+        self.critic = critic
         self.board = board
         self.no_episodes = no_episodes
         
-        if self.critic == 0: # use criticTable
-            from critic import TableCritic
-            self.critic = TableCritic(alpha_c, lamda, gamma)
+        """
+        if self.critic == 0: # use TableCritic
+            from table_critic import TableCritic
+            self.critic = TableCritic(alpha_c, lamda, gamma) #
         else: # use criticNN
             from neural_net import NeuralNetCritic
             state = board.state()
             inputLayerSize = len(state)
-            self.critic = NeuralNetCritic(alpha_c, lamda, gamma, hiddenLayerSizes, inputLayerSize)
-
+            self.critic = NeuralNetCritic(alpha_c, lamda, gamma, dimNN, inputLayerSize)
+        """
         #make visualisation later.
 
 
@@ -47,7 +48,7 @@ class Player :
                     values[s_prime] = random.random() * 0.01
                 delta = t.check_game_score() + gamma * values[s_prime] - values[s]
                 eligibilities_critic[(s, action)] = 1
-
+                
                 for tup in SAP:
 
                     values[tup[0]] += alpha_c * delta * actor.get_eligibilities(tup)
@@ -79,22 +80,6 @@ class Player :
 
             
 
-def boltzmann_scaling_choice(state, policy): #Make a weighted choice on policy
-    actions = state.get_available_moves()
-    weights = []
-    distribution = []
-    sum1 = 0
-    for action in actions:
-        ai = math.e**(policy[(state, action)])
-        weights.append(ai)
-        distribution.append(ai)
-        sum1 = ai
-    for i in range(len(weights)):
-        weights[i] = weights[i]/sum1
-    draw = random.choices(actions, distribution, k=1)
-
-    return draw
-
 
 
 starting_state = Board("t",4,[(2,2)])
@@ -102,8 +87,9 @@ gamma = 0.9
 alpha_a = 0.1
 alpha_c = 0.1
 lamda = 0.5 
+critic = 0 # 0 is table critic, 1 is NN
 
 actor = Actor()
-player = Player (actor, None, starting_state, 100)
+player = Player (actor, None , starting_state, 100)
 player.train(starting_state,gamma,alpha_a,alpha_c,lamda)
 
