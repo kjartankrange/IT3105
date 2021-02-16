@@ -120,6 +120,8 @@ class Board:
             x, y = touple
             self.board[touple[0]][touple[1]].kill()
 
+
+
     def get_nodes(self):  ## returns an array with the nodes in the board.
         nodes = []
         for row in self.board:

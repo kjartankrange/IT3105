@@ -61,9 +61,9 @@ class Player:
                     actor.update_eligibilities(tup, gamma, l)
                 s = s_prime
             epsilon *= epsilon_deg
+
             plot_data.append(len(t.find_alive_nodes()))
             x_axis.append(x)
-
         vis = Visualisation(t)
         show = vis.visualise()
         plt.show()
@@ -80,7 +80,7 @@ class Player:
 
 
 
-starting_state = Board("d",4,[(3,1)])
+starting_state = Board("t",4,[(3,1),(3,3)])
 gamma = 0.9
 alpha_a = 0.7
 alpha_c = 0.1
@@ -88,7 +88,7 @@ lamda = 0.8
 critic = 0 # 0 is table critic, 1 is NN
 eps = 1
 eps_deg = 0.99
-rounds = 9000
+rounds = 4000
 
 actor = Actor()
 
