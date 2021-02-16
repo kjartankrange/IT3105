@@ -10,21 +10,25 @@ import numpy as np
 
 class Player:
 
-    def __init__(self, actor, critic, board):
+    def __init__(self, actor, critic, board, criticType):
         self.actor = actor
         self.critic = critic
         self.board = board
+        self.criticType = criticType
         
-    """
-        if self.critic == 0: # use TableCritic
-            from table_critic import TableCritic
-            self.critic = TableCritic(alpha_c, lamda, gamma) #
-        else: # use criticNN
+    
+        if self.criticType == 1: # use NNcritic
             from neural_net import NeuralNetCritic
             state = board.state()
             inputLayerSize = len(state)
             self.critic = NeuralNetCritic(alpha_c, lamda, gamma, dimNN, inputLayerSize)
+
         """
+        else: # use table critic
+            from table_critic import TableCritic
+            self.critic = TableCritic(alpha_c, lamda, gamma) 
+        """
+        
         #make visualisation later.
 
     def train(self, starting_state, gamma, alpha_a, alpha_c, l, epsilon, epsilon_deg,
@@ -33,8 +37,11 @@ class Player:
         values = {starting_state.state(): random.random()}  # remove later
         plot_data = []
         x_axis = []
-        for x in range(no_episodes):
+        from tqdm import tqdm
+        for x in tqdm(range(no_episodes)):
             actor.reset_eligibilities()
+            if self.criticType==1: 
+                self.critic.resetEligibilities()
             t = copy.deepcopy(starting_state)
             eligibilities_critic = {}  ## Reset eligibilities
             SAP = []
@@ -46,19 +53,32 @@ class Player:
                 t = t.move(action)
                 s_prime = t.state()
 
-                if s_prime not in values.keys():  # critic.get_values(s_prime)
-                    values[s_prime] = random.random()
+                if self.criticType==1: 
+                    td_error = self.critic.findTDError(t.check_game_score(), s, s_prime)
+                    self.critic.fit(t.check_game_score(), s, s_prime, td_error)
+                else:
 
-                delta = t.check_game_score() + gamma * values[s_prime] - values[s]
+                    if s_prime not in values.keys():  # critic.get_values(s_prime)
+                        values[s_prime] = random.random()
+
+                    delta = t.check_game_score() + gamma * values[s_prime] - values[s]
                 if s not in eligibilities_critic.keys():
                     eligibilities_critic[s] = 1
 
                 for tup in SAP:
-                    values[tup[0]] += alpha_c * delta * eligibilities_critic[tup[0]]
+                    if self.criticType==0: 
+                        values[tup[0]] += alpha_c * delta * eligibilities_critic[tup[0]]
                     eligibilities_critic[tup[0]] = gamma * l * eligibilities_critic[tup[0]]
-                    policy = actor.get_policy(tup) + alpha_a * delta * actor.get_eligibilities(tup)
-                    actor.set_policy((s, action), policy)
-                    actor.update_eligibilities(tup, gamma, l)
+                    if self.criticType==1: 
+                        NNpolicy = actor.get_policy(tup) + alpha_a * td_error * actor.get_eligibilities(tup)
+                        #self.critic.updateEligibilities()
+                        actor.set_policy((s, action), NNpolicy)
+                        actor.update_eligibilities(tup, gamma, l)
+                    else:
+                        policy = actor.get_policy(tup) + alpha_a * delta * actor.get_eligibilities(tup)
+                        actor.set_policy((s, action), policy)
+                        actor.update_eligibilities(tup, gamma, l)
+                
                 s = s_prime
             epsilon *= epsilon_deg
             plot_data.append(len(t.find_alive_nodes()))
@@ -70,7 +90,7 @@ class Player:
             
         fig, ax = plt.subplots()
         ax.plot(x_axis, plot_data, 'ro')
-        print(plot_data)
+        #print(plot_data)
         
         ax.set(xlabel='Episode', ylabel='Amount of pegs',
         title='Test')
@@ -81,20 +101,19 @@ class Player:
 
 
 
-starting_state = Board("t",4,[(2,2)])
+starting_state = Board("t",4,[(2,2)]) 
 gamma = 0.9
 alpha_a = 0.7
 alpha_c = 0.1
 lamda = 0.8
-critic = 0 # 0 is table critic, 1 is NN
+critic = 1 # 0 is table critic, 1 is NN
 eps = 1
-eps_deg = 0.99
-rounds = 1000
+eps_deg = 0.995
+rounds = 700
+dimNN = [5]
 
 actor = Actor()
 
 
-player = Player (actor, None , starting_state)
+player = Player (actor, None , starting_state, critic)
 player.train(starting_state,gamma,alpha_a,alpha_c,lamda , eps, eps_deg, rounds)
-
-
