@@ -120,6 +120,8 @@ class Board:
             x, y = touple
             self.board[touple[0]][touple[1]].kill()
 
+
+
     def get_nodes(self):  ## returns an array with the nodes in the board.
         nodes = []
         for row in self.board:
@@ -128,11 +130,17 @@ class Board:
         return nodes
 
     def find_dead_nodes(self):  # helper function for finding nodes without pegs. Returns the id of the nodes as a list
-        nodes = self.get_nodes()
+       # nodes = self.get_nodes()
         dead_nodes = []
-        for i in range(len(nodes)):
-            if nodes[i].is_alive() == 0:
-                dead_nodes.append(nodes[i])
+
+        for row in self.board:
+            for node in row:
+                if node.is_alive() == 0:
+                    dead_nodes.append(node)
+
+       # for i in range(len(nodes)):
+        #    if nodes[i].is_alive() == 0:
+         #       dead_nodes.append(nodes[i])
         return dead_nodes
 
     def find_alive_nodes(
@@ -165,12 +173,27 @@ class Board:
                     moves.append((id, direction))
         return moves
 
+    def exists_available_moves(self): #function for speeding up the computations.
+
+        moves = []  # moves on form {node_id : direction (from dead_node)}
+        dead_nodes = self.find_dead_nodes()
+        for node in dead_nodes:
+            neighbours = node.get_neighbours()
+            double_neighbours = node.get_double_neighbours()
+            for neighbour in neighbours.items():
+                if neighbour[1] is None:
+                    continue
+                if neighbour[0] in double_neighbours and neighbour[1].is_alive() and double_neighbours[
+                    neighbour[0]] is not None and double_neighbours[neighbour[0]].is_alive():
+                    return True
+        return False
+
 
     def check_game_score(self): #returns if board is still playing, won, lost
-        if len(self.get_available_moves())!=0:
+        if self.node_count==1:
+            return 100
+        if self.exists_available_moves():
             return 0 #game is not over
-        elif self.node_count==1:
-            return 100 #game is won
         else:
             return -100 #game is lost
 
@@ -202,7 +225,7 @@ class Board:
         for line in self.board:
             for node in line:
                 string += str(node.alive)
-        return string
+        return  string
 
 
 

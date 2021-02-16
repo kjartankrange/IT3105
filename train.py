@@ -81,16 +81,20 @@ class Player:
                 
                 s = s_prime
             epsilon *= epsilon_deg
+
             plot_data.append(len(t.find_alive_nodes()))
             x_axis.append(x)
-
         vis = Visualisation(t)
         show = vis.visualise()
         plt.show()
             
         fig, ax = plt.subplots()
+<<<<<<< HEAD
         ax.plot(x_axis, plot_data, 'ro')
         #print(plot_data)
+=======
+        ax.plot(x_axis, plot_data)
+>>>>>>> facd8f34de071c454b758a807da823eb7ba096e3
         
         ax.set(xlabel='Episode', ylabel='Amount of pegs',
         title='Test')
@@ -101,16 +105,25 @@ class Player:
 
 
 
+<<<<<<< HEAD
 starting_state = Board("t",4,[(2,2)]) 
+=======
+starting_state = Board("t",4,[(3,1),(3,3)])
+>>>>>>> facd8f34de071c454b758a807da823eb7ba096e3
 gamma = 0.9
 alpha_a = 0.7
 alpha_c = 0.1
 lamda = 0.8
 critic = 1 # 0 is table critic, 1 is NN
 eps = 1
+<<<<<<< HEAD
 eps_deg = 0.995
 rounds = 700
 dimNN = [5]
+=======
+eps_deg = 0.99
+rounds = 4000
+>>>>>>> facd8f34de071c454b758a807da823eb7ba096e3
 
 actor = Actor()
 
