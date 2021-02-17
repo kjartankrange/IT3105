@@ -22,7 +22,6 @@ class Player:
             state = board.state()
             inputLayerSize = len(state)
             self.critic = NeuralNetCritic(alpha_c, lamda, gamma, dimNN, inputLayerSize)
-
         """
         else: # use table critic
             from table_critic import TableCritic
@@ -40,8 +39,10 @@ class Player:
         from tqdm import tqdm
         for x in tqdm(range(no_episodes)):
             actor.reset_eligibilities()
+            """
             if self.criticType==1: 
                 self.critic.resetEligibilities()
+            """
             t = copy.deepcopy(starting_state)
             eligibilities_critic = {}  ## Reset eligibilities
             SAP = []
@@ -51,10 +52,11 @@ class Player:
                 action = actor.choose_action(s, actions, epsilon)  # pick move from distribution
                 SAP.append((s, action))
                 t = t.move(action)
-                s_prime = t.state()
+                s_prime = t.state() #s prime is (new) state, s is last state
 
                 if self.criticType==1: 
-                    td_error = self.critic.findTDError(t.check_game_score(), s, s_prime)
+                    td_error = float(self.critic.findTDError(t.check_game_score(), s, s_prime))
+                    #print(td_error)
                     self.critic.fit(t.check_game_score(), s, s_prime, td_error)
                 else:
 
@@ -72,16 +74,17 @@ class Player:
                     if self.criticType==1: 
                         NNpolicy = actor.get_policy(tup) + alpha_a * td_error * actor.get_eligibilities(tup)
                         #self.critic.updateEligibilities()
-                        actor.set_policy((s, action), NNpolicy)
+                        actor.set_policy(tup, NNpolicy)
                         actor.update_eligibilities(tup, gamma, l)
                     else:
                         policy = actor.get_policy(tup) + alpha_a * delta * actor.get_eligibilities(tup)
-                        actor.set_policy((s, action), policy)
+                        actor.set_policy(tup, policy)
                         actor.update_eligibilities(tup, gamma, l)
                 
                 s = s_prime
             epsilon *= epsilon_deg
 
+            
             plot_data.append(len(t.find_alive_nodes()))
             x_axis.append(x)
         vis = Visualisation(t)
@@ -89,12 +92,8 @@ class Player:
         plt.show()
             
         fig, ax = plt.subplots()
-<<<<<<< HEAD
         ax.plot(x_axis, plot_data, 'ro')
         #print(plot_data)
-=======
-        ax.plot(x_axis, plot_data)
->>>>>>> facd8f34de071c454b758a807da823eb7ba096e3
         
         ax.set(xlabel='Episode', ylabel='Amount of pegs',
         title='Test')
@@ -104,29 +103,21 @@ class Player:
 
 
 
-
-<<<<<<< HEAD
-starting_state = Board("t",4,[(2,2)]) 
-=======
-starting_state = Board("t",4,[(3,1),(3,3)])
->>>>>>> facd8f34de071c454b758a807da823eb7ba096e3
-gamma = 0.9
-alpha_a = 0.7
-alpha_c = 0.1
-lamda = 0.8
+starting_state = Board("t",5,[(1,1)]) 
+gamma = 0.9 #discount factor
+alpha_a = 0.7 #learning rate alpha
+alpha_c = 0.01 #learning rate critic
+lamda = 0.85 # trace decay factor
 critic = 1 # 0 is table critic, 1 is NN
-eps = 1
-<<<<<<< HEAD
-eps_deg = 0.995
-rounds = 700
-dimNN = [5]
-=======
-eps_deg = 0.99
-rounds = 4000
->>>>>>> facd8f34de071c454b758a807da823eb7ba096e3
+eps = 1 #epsilon
+eps_deg = 0.9 #epsilon decay
+rounds = 300 #no of episodes
+dimNN = [5] #hidden layers in network
 
 actor = Actor()
 
 
 player = Player (actor, None , starting_state, critic)
 player.train(starting_state,gamma,alpha_a,alpha_c,lamda , eps, eps_deg, rounds)
+
+

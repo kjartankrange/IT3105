@@ -4,6 +4,7 @@ from node import *
 import copy
 from node import *
 from Visualisation import *
+from game import *
 
 
 def make_triangle(size):  # Helperfunction for creating triangles.
@@ -190,12 +191,13 @@ class Board:
 
 
     def check_game_score(self): #returns if board is still playing, won, lost
-        if self.node_count==1:
-            return 100
-        if self.exists_available_moves():
-            return 0 #game is not over
+        if len(self.get_available_moves())>0:
+            return 0
+        if len(self.find_alive_nodes())==1:
+            return 100 #game is not over
         else:
             return -100 #game is lost
+        
 
     def move(self, move):  # input: move on form (id, direction). Returns a board object iwth the applied move.
         nodes = self.get_nodes()

@@ -1,3 +1,4 @@
+import random
 class Table_critic():
 
     def __init__(self):

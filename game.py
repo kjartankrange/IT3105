@@ -1,3 +1,4 @@
+
 from board import *
 from Visualisation import *
 import random
@@ -28,9 +29,9 @@ def check_game_score(board): #returns if board is still playing, won, lost
     if len(board.get_available_moves())!=0:
         return 0 #game is not over
     elif board.node_count==1:
-        return 1 #game is won
+        return 100 #game is won
     else:
-        return -1 #game is lost
+        return -100 #game is lost
 
 
 def main(): # running the game with random moves.
@@ -56,3 +57,4 @@ def main(): # running the game with random moves.
         plt.show()
 
 #main()
+
