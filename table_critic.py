@@ -10,23 +10,28 @@ class Table_critic():
     
     def get_eligibilities(self,state):
         if state not in self.eligibilities.keys():
-            self.eligibilities[state] = random.random()*0.001
+            return False
         return self.eligibilities[state]
+    def set_eligibility(self, state, value):
+        self.eligibilities[state] = value
             
     def decay_refresh_eligibilities(self,state,gamma,l):
-        self.eligibilities[state] = 1
+        #self.eligibilities[state] = 1
         for key in self.eligibilities.keys():
-            if key != state:
-                self.eligibilities[key] = self.eligibilities[key]*gamma*l
+            self.eligibilities[key] = self.eligibilities[key]*gamma*l
 
-    def get_values(self,state):
+    def get_value(self,state):
         if state not in self.values.keys():
-            self.values[state] = 0
+            return False
         return self.values[state]
 
-    def set_values(self,state, value):
-        if state not in self.values.keys():
-            self.values[state] = 0
+    def set_value(self,state, value):
         self.values[state] = value
+    
+    def create_eligibilities(self, state):
+        self.eligibilities[state] = 0
+
+    def create_value(self, state):
+        self.values[state] = random.random()
 
  

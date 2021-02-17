@@ -19,7 +19,7 @@ class Actor:
     
     def get_eligibilities(self,state_action_tup):
         if state_action_tup not in self.eligibilities.keys():
-            self.eligibilities[state_action_tup] = random.random()*0.01
+            self.eligibilities[state_action_tup] = random.random() #0.01
         return self.eligibilities[state_action_tup]
             
     def update_eligibilities(self,state_action_tup,gamma,l):
@@ -47,13 +47,5 @@ class Actor:
             if random.random() < epsilon:
                 return random.choice(list(actions_values.keys()))[1]
             return max(actions_values.keys(), key=(lambda x: actions_values[x]))[1]
-
-
-
-    def set_epsilon(self, epsilon):
-        self.epsilon = epsilon
-
-    def get_epsilon(self):
-        return epsilon
 
 

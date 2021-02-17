@@ -1,10 +1,7 @@
-
-
 from node import *
 import copy
 from node import *
 from Visualisation import *
-from game import *
 
 
 def make_triangle(size):  # Helperfunction for creating triangles.
@@ -30,7 +27,7 @@ class Board:
         self.node_count = 0
         self.size = size
 
-        if shape == "t" and (size not in range(4, 9)) or shape == "d" and (size not in range(3, 7)):
+        if not( shape == "t" or shape == "d"):
             raise Exception("wrong initialization")  # the board must be of correct dimensions.
         self.shape = shape
         # TODO: Create helper functions in order to make the code more segmented.
@@ -105,12 +102,6 @@ class Board:
                     self.board[i][j].neighbours["SE"] = board_copy[i + 2 + 1][j + 2]
 
         # Set double neighbours
-        """for i in range(len(self.board)):
-            for j in range(len(self.board[i])): 
-                node = self.board[i][j]
-                for key in node.get_neighbours().keys():
-                    if node.neighbours[key] != None:
-                        node.get_double_neighbours()[key] = node.neighbours[key].neighbours[key]"""
         for lst in self.board:
             for node in lst:
                 for key in node.neighbours.keys():
@@ -131,7 +122,6 @@ class Board:
         return nodes
 
     def find_dead_nodes(self):  # helper function for finding nodes without pegs. Returns the id of the nodes as a list
-       # nodes = self.get_nodes()
         dead_nodes = []
 
         for row in self.board:
@@ -139,9 +129,7 @@ class Board:
                 if node.is_alive() == 0:
                     dead_nodes.append(node)
 
-       # for i in range(len(nodes)):
-        #    if nodes[i].is_alive() == 0:
-         #       dead_nodes.append(nodes[i])
+
         return dead_nodes
 
     def find_alive_nodes(
