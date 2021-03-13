@@ -27,7 +27,7 @@ class NeuralNetCritic:
         self.eligibilities = []
         self.reset_eligibilities()
 
-        #using adagrad as optimizer
+        #using adagrad as optimizer, good for sparse data
         adagrad = tf.keras.optimizers.Adagrad(learning_rate=alpha_c)
         self.model.compile(optimizer=adagrad,loss=tf.keras.losses.MeanSquaredError(), run_eagerly = True)
          
@@ -82,7 +82,7 @@ class NeuralNetCritic:
     def modify_gradients(self, gradients, td_error):
         for i in range(len(gradients)):
             gradients[i] = gradients[i] * 1/(2*td_error) #from formula in actor critic model
-            self.eligibilities[i] = tf.add(self.eligibilities[i], gradients[i]) # adjust eligibilities with current gradient
+            self.eligibilities[i] = tf.add(self.eligibilities[i], gradients[i]) # adjust eligibilities with current gradient lamda?
             gradients[i] = self.alpha_c* self.eligibilities[i]* td_error # Should alpha_c be applied here? this formula says so, wi ←wi+αδei
         return gradients
 

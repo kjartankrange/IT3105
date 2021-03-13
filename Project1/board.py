@@ -91,7 +91,7 @@ class Board:
                     self.board[i][j].neighbours["NE"] = board_copy[i + 2 - 1][j + 2]
                     self.board[i][j].neighbours["SW"] = board_copy[i + 2 + 1][j + 2 - 1]
                     self.board[i][j].neighbours["SE"] = board_copy[i + 2 + 1][j + 2]
-
+            # bottom half
             for i in range(first_half + 1, len(self.board)):
                 for j in range(len(self.board[i])):
                     self.board[i][j].neighbours["W"] = board_copy[i + 2][j + 2 - 1]

@@ -71,7 +71,7 @@ class Visualisation:
 
     def dist(self, u,v):   ## helper method for computing distances in space, using np.linalg.norm
         distance_vector = [u[0] - v[0], u[1]- v[1]]
-        return np.linalg.norm(distance_vector)
+        return np.linalg.norm(distance_vector) #finding norm of vector
 
     def make_dead(self, status): ## input is a board, which is a list populated with nodes
         status = self.format_board(status)

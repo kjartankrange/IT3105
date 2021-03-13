@@ -41,8 +41,8 @@ class Player:
         x_axis = []
         from tqdm import tqdm #progressbar
         for x in tqdm(range(no_episodes)):
-            self.actor.reset_eligibilities()
-            self.critic.reset_eligibilities()
+            self.actor.reset_eligibilities() #gives backup to states, how often used, SAP
+            self.critic.reset_eligibilities() #gives backup to states, how often used, states
             t = copy.deepcopy(starting_state)
             SAP = []
             s = t.state()
@@ -125,18 +125,18 @@ class Player:
         #visualiser = Visualisation(state)
 
 #1) The type of Solitaire board: diamond or triangle.
-type_of_board = "t" #"t" for triangle "d"for diamond
+type_of_board = "d" #"t" for triangle "d"for diamond
 #2) The size of the board.
-size_of_board = 5
+size_of_board = 4
 #3) The open cell (or cells) in the puzzle’s start state.
 #Center for t5: (2,1), (3,1), (3,2), for d4:(3,1), (3,2)
-open_cells = [(2,1)] #just add more tuples for more holes. T5: (2,1), (3,2) D4: (3,1), (3,2)
+open_cells = [(3,2),(2,1),(3,1), (4,2)] #just add more tuples for more holes. T5: (2,1), (3,2) D4: (3,1), (3,2). Not (2,1)+(4,1) for d4
 #4) Number of episodes to run
-episodes = 300 #no of episodes
+episodes = 20 #no of episodes
 #5) Whether the critic should use table lookup or a neural network.
-critic_type = 1 # 0 is table critic, 1 is NN
+critic_type = 0 # 0 is table critic, 1 is NN
 #6) The dimensions of the critic’s neural network
-dimNN = [5] #hidden layers in network
+dimNN = [20,30,5] #hidden layers in network
 #7) The learning rates for the actor and critic
 alpha_a = 0.7 #learning rate actor
 alpha_c = 0.01 #learning rate critic
@@ -146,7 +146,7 @@ lamda = 0.85 # trace decay factor
 gamma = 0.9 #discount factor
 #10) The initial value of ε for the actor’s ε-greedy strategy and ε decay rate.
 eps = 1 #epsilon
-eps_deg = 0.9 #epsilon decay
+eps_deg = 0.9 #epsilon decay, 
 #11) A display variable indicating when actual games will be visualized.
 display = 1 #1 is visualize 0 is not
 #12) The delay between frames of the game viewer.
