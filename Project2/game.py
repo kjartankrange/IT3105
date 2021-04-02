@@ -32,11 +32,10 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
             board.append(row)
         return board ## returns a n x n dimensional board, which is a 45 degree rotation of the hexagonal board (n is the size)
 
-
     def get_game(self):
         return self
 
-    def get_node_id(self, position):
+    def get_node_id(self, position): ##position on form (x,y)
         return self.position_to_node_id[position]
 
     def create_neighbours(self, size):
@@ -64,7 +63,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                     self.graph.add_edge(node_id, neighbour_id) #Create edge in the networkx object
         return neighbours
 
-    def get_neighbours(self, position):
+    def get_neighbours(self, position): #returns list of neighbours from position
         return self.neighbours[position]
 
     def occupied_by(self, position): #returns 0 if empty, 1 if occupied by player 1, 2 by player 2
@@ -74,21 +73,21 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         # must find end nodes in both outer edges
     def create_goal_nodes(self):
 
-
         player_one_start = self.board[0]
         player_one_end = self.board[len(self.board) -1]
-        player_two_start = self.board[:][0]
-        player_two_end = self.board[:][len(self.board) - 1]
+        player_two_start = []
+        player_two_end = []
+        for row in self.board: ## This doesnt work. Doesnt update. Will fix later
+            player_two_start.append(row[0])
+            player_two_end.append(row[len(self.board) -1])
+
         return [player_one_start, player_one_end], [player_two_start,player_two_end]
 
-
-    def is_game_over(self, move): #a move should be on the form (player_id, (x_pos, y_pos))
-            player_id = move[0]
-            position = move[1]
-
+    # Can use parameters player_id, move ?
+    def is_game_over(self, player_id, position): #position should be on the form (x_pos, y_pos)
             neighbours = self.get_neighbours(position)
-
             values =[]
+
             for neighbour in neighbours: ##check for no neighbours of same colour to speed up process
                 value = self.board[neighbour[0]][neighbour[1]]
                 values.append(value)
@@ -102,26 +101,28 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
             stack = [position]
             visited = []
             start_nodes, goal_nodes = self.goal_nodes[player_id - 1]
+            print(start_nodes, goal_nodes)
             filled_cells = []
             filled_cells.append(position)
 
             while len(stack) > 0 :
-
                 node = stack.pop()
                 visited.append(node)
-
+                neighbours = self.get_neighbours(node)
                 for neighbour in neighbours:
 
                     x_pos, y_pos = neighbour
-                    node = self.board[x_pos][y_pos]
-                    if node == player_id and neighbour not in visited:
+                    colour = self.board[x_pos][y_pos]
+                    if colour == player_id and neighbour not in visited:
                         filled_cells.append(neighbour)
                         stack.append(neighbour)
                         visited.append(neighbour)
-                        neighbours = self.get_neighbours((x_pos,y_pos))
+                       # neighbours = self.get_neighbours((x_pos,y_pos))
 
-
-            if sum(start_nodes) > 0 and sum(goal_nodes) >0:
+            if player_id == 2:
+                start_nodes = list(zip(*self.board))[0]
+                goal_nodes = list(zip(*self.board))[self.size -1]
+            if player_id in start_nodes  and player_id in goal_nodes :
                 start, end = False, False
                 for node in filled_cells:
                     i, j = node
@@ -136,22 +137,17 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                             start = True
                         if j == len(self.board) -1 :
                             end = True
+                if start and end:
+                    print("Player ", player_id, " won!!!")
                 return start and end
-
 
             return False
 
-
-
-
-
-
-
-
-    def move(self, move, player): #places a player
+    def move(self, player_id, move): #places a player
         if self.can_move(move):
             x_pos = move[0]
             y_pos = move[1]
+            print(move, player)
             self.board[x_pos][y_pos] = player
         else:
             raise Exception("Invalid move")
@@ -161,8 +157,24 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         y_pos = move[1]
         return not self.board[x_pos][y_pos]
 
+    def get_state(self):
+        result = ""
+        for row in self.board:
+            result += "".join(map(str,row))
+        return result
+
     def visualise(self):
-        vis = nx.draw(self.graph, self.pos, node_color ="lightgrey",
+        colour_map = []
+        for row in self.board:
+            for node in row:
+                if node == 1:
+                    colour_map.append("#ff4d4d")
+                elif node == 2:
+                    colour_map.append("#4d4dff")
+                else:
+                    colour_map.append("lightgrey")
+
+        vis = nx.draw(self.graph, self.pos, node_color =colour_map,
                        node_size=700)
         plt.show()
 
@@ -173,24 +185,26 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 # path compression
 
 
+import random
 g = Game(4)
-print(g.is_game_over(((1), (1,1))))
+length = len(g.board)
+x = random.randint(0,length-1)
+y = random.randint(0,length-1)
+player = 1
+g.move( player, (x,y))
 g.visualise()
+while not g.is_game_over(player, (x,y)):
 
-g.move((0,0),1)
-g.move((1,0),1)
-g.move((1,1),1)
-g.move((0,1),1)
-#g.move((2,2),1)
-#g.move((1,2),1)
-#g.move((2,1),2)
-#g.move((3,1),1)
-print("The game is over", g.is_game_over(((1), (3,1))))
-#g.move((1,1),1)
+    x_new = random.randint(0, length-1)
+    y_new = random.randint(0, length-1)
+    if not g.can_move((x_new,y_new)):
+        continue
 
-#print(g.is_game_over((1,(2,1))))
-
-
-
-
-
+    if player == 1:
+        player = 2
+    elif player == 2:
+        player = 1
+    x,y = x_new, y_new
+    g.move( player, (x, y))
+    g.visualise()
+print(g.get_state())
