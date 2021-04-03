@@ -101,7 +101,6 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
             stack = [position]
             visited = []
             start_nodes, goal_nodes = self.goal_nodes[player_id - 1]
-            print(start_nodes, goal_nodes)
             filled_cells = []
             filled_cells.append(position)
 
@@ -117,7 +116,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                         filled_cells.append(neighbour)
                         stack.append(neighbour)
                         visited.append(neighbour)
-                       # neighbours = self.get_neighbours((x_pos,y_pos))
+
 
             if player_id == 2:
                 start_nodes = list(zip(*self.board))[0]
@@ -147,7 +146,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         if self.can_move(move):
             x_pos = move[0]
             y_pos = move[1]
-            print(move, player)
+            print("player ", player_id, "placed a piece on : ", move)
             self.board[x_pos][y_pos] = player
         else:
             raise Exception("Invalid move")
@@ -186,7 +185,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
 
 import random
-g = Game(4)
+g = Game(5)
 length = len(g.board)
 x = random.randint(0,length-1)
 y = random.randint(0,length-1)
@@ -207,4 +206,4 @@ while not g.is_game_over(player, (x,y)):
     x,y = x_new, y_new
     g.move( player, (x, y))
     g.visualise()
-print(g.get_state())
+
