@@ -1,7 +1,10 @@
 from game import *
 from Tree import *
+from copy import deepcopy
 
 class MCTS:
+
+
 
 
     def __init__(self, default_policy, exploration_constant, tree, board):
@@ -9,42 +12,40 @@ class MCTS:
         self.exploration_constant = exploration_constant
         self.tree = tree
         self.board = board
+        self.nodes = {}  # ( state) --> node
+        self.nodes[board.get_state()] = Node(board.get_player(), board.get_available_moves())
 
     ## methods: Tree se
-    def tree_search(self, starting_state, time):
+    def tree_search(self, time):
         while time:
-            self.simulate(self.board, starting_state) ## copy states
+            self.simulate(self.board) ## copy states
             time -= 1
 
 
     def simulate(self, board, starting_state):
-        board.set_position(starting_state) ## implement in game
-        path = self.sim_tree(board)         ##if test?
-        z = self.sim_default(board)
-        self.tree.backup(path,z)
+        board_copy = deepcopy(board)
+        path = self.sim_tree(board_copy)         ##if test?
+        z = self.sim_default(board_copy)
+        self.tree.backup(path, z)
 
 
 
     def sim_tree(self, board):
-        t = 0
+       # t = 0 dont think we need this. used in pseudocode to build trees
         state = board.get_state()
-        action = self.tree.select_move(board, self.exploration_constant)
+        action = self.select_move(board)
         path = []
         while not board.is_game_over(action):
             valid_actions = board.get_available_moves()
-            if state not in self.tree.get_nodes():
-                node = Node(state, board.get_player(), valid_actions)
+            if state not in self.nodes.keys():
+                node = Node( board.get_player(), valid_actions)
                 path.append(node)
                 return path
             path.append(state)
-            action = self.tree.select_move(board, self.exploration_constant)
+            action = self.select_move(board, self.exploration_constant)
             board.move(action)
             state = board.get_state()
         return path
-
-
-
-
 
 
 
@@ -57,30 +58,18 @@ class MCTS:
             action = self.default_policy
         return winner
 
-
-
-class Tree:
-
-    nodes = {} #( state) --> node
-
-
-    def get_nodes(self):
-        return self.nodes
-
-    def select_move(self, board,  exploration_constant):
+    def select_move(self, board):
         valid_moves = board.get_available_moves()
         player = board.get_player()
         action_values = []
         node = self.nodes.get(board.get_state())
 
         for move in valid_moves:
-            action_values.append(node.compute_value(move, exploration_constant, player))
+            action_values.append(node.compute_value(move, self.exploration_constant, player))
         if player == 1:
             return valid_moves[np.argmax(action_values)]
         else:
             return valid_moves[np.argmin(action_values)]
-
-
 
 
     def backup(self, nodes, z): #nodes is a list of nodes representing the states, z is the end value
@@ -96,8 +85,8 @@ from math import sqrt, log
 class Node:
 
 
-    def __init__(self, state, player, valid_actions):
-        N = 0
+    def __init__(self, player, valid_actions): #each node corresponds to a state
+        self.N = 0
         self.action = None
         values = {}
         for action in valid_actions:
