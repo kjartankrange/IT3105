@@ -32,7 +32,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
             board.append(row)
         return board ## returns a n x n dimensional board, which is a 45 degree rotation of the hexagonal board (n is the size)
 
-    def get_game(self):
+    def get_board(self):
         return self
 
     def get_node_id(self, position): ##position on form (x,y)
@@ -66,9 +66,6 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
     def get_neighbours(self, position): #returns list of neighbours from position
         return self.neighbours[position]
 
-    def occupied_by(self, position): #returns 0 if empty, 1 if occupied by player 1, 2 by player 2
-        x_pos ,y_pos = position
-        return self.board[x_pos][y_pos]
 
         # must find end nodes in both outer edges
     def create_goal_nodes(self):
@@ -147,9 +144,21 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
             x_pos = move[0]
             y_pos = move[1]
             print("player ", player_id, "placed a piece on : ", move)
-            self.board[x_pos][y_pos] = player
+            self.board[x_pos][y_pos] = player_id
         else:
             raise Exception("Invalid move")
+
+    def get_player(self):
+        return self.player
+
+    def get_valid_actions(self):
+        valid_actions = []
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.board[i][j] == 0:
+                    valid_actions.append((i, j))
+        return valid_actions
+
 
     def can_move(self, move): # checks if a hex player can make the desired move (move on form (i, j))
         x_pos = move[0]
@@ -183,27 +192,22 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 # connect if
 # path compression
 
+if __name__ == "__main__":
+    import random
+    g = Game(5)
+    length = len(g.board)
+    move = random.choice(g.get_valid_actions())
 
-import random
-g = Game(5)
-length = len(g.board)
-x = random.randint(0,length-1)
-y = random.randint(0,length-1)
-player = 1
-g.move( player, (x,y))
-g.visualise()
-while not g.is_game_over(player, (x,y)):
-
-    x_new = random.randint(0, length-1)
-    y_new = random.randint(0, length-1)
-    if not g.can_move((x_new,y_new)):
-        continue
-
-    if player == 1:
-        player = 2
-    elif player == 2:
-        player = 1
-    x,y = x_new, y_new
-    g.move( player, (x, y))
+    player = 1
+    g.move(player, move)
     g.visualise()
+    while not g.is_game_over(player, move):
+
+        if player == 1:
+            player = 2
+        elif player == 2:
+            player = 1
+        move = random.choice(g.get_valid_actions())
+        g.move(player, move)
+        g.visualise()
 
