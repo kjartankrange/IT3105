@@ -8,8 +8,9 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                        # graph handling, and goal noades, which are the nodes in the outer edges for each player
 
 
-    def __init__(self, size): #Inititialise the game object. Assumes games with diamond shaped boards.
+    def __init__(self, size, player): #Inititialise the game object. Assumes games with diamond shaped boards.
         self.size = size
+        self.player = player
         self.position_to_node_id = {}
         self.board = self.create_board(size)
         self.neighbours = self.create_neighbours(size)
@@ -81,19 +82,17 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         return [player_one_start, player_one_end], [player_two_start,player_two_end]
 
     # Can use parameters player_id, move ?
-    def is_game_over(self, player_id, position): #position should be on the form (x_pos, y_pos)
+    def is_game_over(self, position): #position should be on the form (x_pos, y_pos)
+            player_id = 2 if self.player == 1 else 1
+
             neighbours = self.get_neighbours(position)
             values =[]
 
             for neighbour in neighbours: ##check for no neighbours of same colour to speed up process
                 value = self.board[neighbour[0]][neighbour[1]]
                 values.append(value)
-            if player_id == 1:
-                if 1 not in values:
-                    return False
-            if player_id == 2:
-                if 2 not in values:
-                    return False
+            if player_id not in values:
+                return False
 
             stack = [position]
             visited = []
@@ -139,12 +138,16 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
             return False
 
-    def move(self, player_id, move): #places a player
+    def move(self, move): #places a player
         if self.can_move(move):
             x_pos = move[0]
             y_pos = move[1]
-            print("player ", player_id, "placed a piece on : ", move)
-            self.board[x_pos][y_pos] = player_id
+            print("player ", self.player, "placed a piece on : ", move)
+            self.board[x_pos][y_pos] = self.player
+            if self.player == 1:
+                self.player = 2
+            elif self.player == 2:
+                self.player = 1
         else:
             raise Exception("Invalid move")
 
@@ -194,20 +197,15 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
 if __name__ == "__main__":
     import random
-    g = Game(5)
-    length = len(g.board)
+    g = Game(5, 1)
+
     move = random.choice(g.get_valid_actions())
 
-    player = 1
-    g.move(player, move)
+    g.move( move)
     g.visualise()
-    while not g.is_game_over(player, move):
+    while not g.is_game_over( move):
 
-        if player == 1:
-            player = 2
-        elif player == 2:
-            player = 1
         move = random.choice(g.get_valid_actions())
-        g.move(player, move)
+        g.move( move)
         g.visualise()
 
