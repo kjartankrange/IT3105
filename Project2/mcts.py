@@ -1,5 +1,5 @@
 from game import *
-from Tree import *
+#from Tree import *
 from copy import deepcopy
 
 class MCTS:
@@ -12,8 +12,11 @@ class MCTS:
         self.exploration_constant = exploration_constant
         self.tree = tree
         self.board = board
-        self.nodes = {}  # ( state) --> node
-        self.nodes[board.get_state()] = Node(board.get_player(), board.get_available_moves())
+        self.nodes = {}  # (state) --> node
+        self.nodes[board.get_state()] = Node(board.get_player(), board.get_valid_actions())
+
+    def init_MCT(self):
+        self.nodes.clear()
 
     ## methods: Tree se
     def tree_search(self, time, board):
@@ -53,7 +56,7 @@ class MCTS:
                 path.append(node)
                 return path
             path.append(state)
-            action = self.select_move(board, self.exploration_constant)
+            action = self.select_move(board)
             board.move(action)
             state = board.get_state()
         return path

@@ -29,7 +29,6 @@ class RL:
 
         #self.NN.save() #Randomly initialize parameters (weights and biases) of ANET
 
-
         for g_a in tqdm(range(self.number_actual_games)):
             #TODO skal vi lage nye games eller resete?    
             self.game = Game(self.size, self.player) # Initialize the actual game board (Ba) to an empty board.
@@ -37,9 +36,10 @@ class RL:
             starting_board_state = self.starting_board_state # s_init ← starting board state
 
             #TODO Spør mattias hvordan dette funker
-            #self.MCTS.init_tree() # Initialize the Monte Carlo Tree (MCT) to a single root, which represents sinit
+            self.MCTS.init_MCT() # Initialize the Monte Carlo Tree (MCT) to a single root, which represents sinit
 
             is_game_over = False
+            B_a = self.game.get_board()
             while not is_game_over: # While Ba not in a final state:
                 """
                 MCTS.board = starting_board_state # Initialize Monte Carlo game board (Bmc) to same state as root.
@@ -54,9 +54,9 @@ class RL:
                 """
                 D = [] # distribution of visit counts in MCT along all arcs emanating from root.
 
-                #D = self.MCTS.tree_search(B_a, self.number_search_games) #TODO denne returnerer ingenting atm
+                D = self.MCTS.tree_search(B_a, self.number_search_games) #TODO denne returnerer ingenting atm
 
-                #replay_buffer[root] = D # Add case (root, D) to RBUF
+                replay_buffer[root] = D # Add case (root, D) to RBUF
 
                 move = random.choice(self.game.get_valid_actions()) #self.game.get_valid_actions()[argmax(replay_buffer[root])] # Choose actual move (a*) based on D
 
@@ -91,8 +91,12 @@ if __name__ == "__main__":
     NN = 0
     player = 1
     size = 5
-    MCTS = 0
-    run = RL(100,NN,MCTS, 10, Game(size,player),1,player, size)
+    default_policy = None
+    exploration_constant = 1
+    tree = 1
+    board = Game(size, player)
+    MCTS = MCTS(default_policy, exploration_constant, tree, board)
+    run = RL(100,NN,MCTS, 10, board,1,player, size)
     run.RL_algorhitm()
 
 
