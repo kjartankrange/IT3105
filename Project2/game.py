@@ -139,7 +139,8 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                         if j == len(self.board) -1 :
                             end = True
                 if start and end:
-                    print("Player ", player_id, " won!!!")
+                    #print("Player ", player_id, " won!!!")
+                    return self.player
                 return start and end
 
             return False
@@ -148,7 +149,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         if self.can_move(move):
             x_pos = move[0]
             y_pos = move[1]
-            print("player ", self.player, "placed a piece on : ", move)
+            #print("player ", self.player, "placed a piece on : ", move)
             self.board[x_pos][y_pos] = self.player
             if self.player == 1:
                 self.player = 2
