@@ -16,10 +16,21 @@ class MCTS:
         self.nodes[board.get_state()] = Node(board.get_player(), board.get_available_moves())
 
     ## methods: Tree se
-    def tree_search(self, time):
+    def tree_search(self, time, board):
         while time:
-            self.simulate(self.board) ## copy states
+            self.simulate(board) ## copy states
             time -= 1
+
+        moves = self.board.get_move_distribution
+        root_node = self.nodes.get(board.get_state())
+        distribution = np.zeros(len(moves))
+        for index in range(len(distribution)):
+            action = moves[index]
+            if action not in root_node.values.keys():
+                distribution[index] = 0
+            else:
+                distribution[index] = root_node[action][1]/root_node.N
+        return distribution
 
 
     def simulate(self, board, starting_state):
