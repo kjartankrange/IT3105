@@ -62,7 +62,6 @@ class RL:
 
                 if self.game.is_game_over(move):
                     is_game_over = True
-                    break
                 self.game.move(move) # Perform a* on root to produce successor state s*
                 
                 s = self.game.get_board()
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     player = 1
     size = 5
     MCTS = 0
-    run = RL(100,NN,MCTS, 0, Game(size,player),1,player, size)
+    run = RL(100,NN,MCTS, 10, Game(size,player),1,player, size)
     run.RL_algorhitm()
 
 
