@@ -83,8 +83,8 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
     # Can use parameters player_id, move ?
     def is_game_over(self, position): #position should be on the form (x_pos, y_pos)
-            player_id = 2 if self.player == 1 else 1
-
+            #player_id = 2 if self.player == 1 else 1
+            player_id = self.player
             neighbours = self.get_neighbours(position)
             values =[]
 
