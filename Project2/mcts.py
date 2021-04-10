@@ -2,7 +2,7 @@ from game import *
 #from Tree import *
 from copy import deepcopy
 import random
-
+import numpy as np
 class MCTS:
 
 
@@ -25,6 +25,7 @@ class MCTS:
 
         moves = board.get_move_distribution()
         root_node = self.nodes.get(board.get_state())
+
         distribution = np.zeros(len(moves))
         for index in range(len(distribution)):
             action = moves[index]
@@ -37,6 +38,7 @@ class MCTS:
 
     def simulate(self, board):
         board_copy = deepcopy(board)
+        board_copy.visualise()
         path = self.sim_tree(board_copy)         ##if test?
         if path:
             z = self.sim_default(board_copy)
@@ -76,15 +78,18 @@ class MCTS:
         if not valid_actions: ## gets error here
             return
         action = random.choice(board.get_valid_actions())
-        winner = board.is_game_over(action)
-        while not winner:
+        c=0
+        while not board.is_game_over(action):
             board.move(action)
-            winner = board.is_game_over(action)
             #action = self.default_policy
-            if not(len(board.get_valid_actions())):
-                break
-            action = random.choice(board.get_valid_actions())
-        return winner ## returns the winner, 1 for player 1, 2 for player 2.
+            if board.get_valid_actions():
+                action = random.choice(board.get_valid_actions())
+                c+=1
+                print(c)
+            board.visualise()
+        board.move(action)
+        board.visualise()
+        return board.is_game_over(action) ## returns the winner, 1 for player 1, 2 for player 2.
 
 
     def select_move(self, board):
@@ -106,7 +111,7 @@ class MCTS:
 
     def backup(self, nodes, z): #nodes is a list of nodes representing the states, z is the end value
         
-        for node in nodes:
+        for node in nodes: #node.action is prev action
             action = node.action
             node.update_state_visit()
             node.update_action_visit(action)
@@ -126,8 +131,6 @@ class Node:
             self.values[action] =  [0,0] ## Q(s,a), N(s,a)
 
     def update_action_visit(self, action):
-        if action not in self.values.keys():
-            self.values[action] = [0,0]
         self.values[action][1]  += 1
 
     def update_value(self, action, z):
@@ -159,8 +162,3 @@ class Node:
     ## parent?
 
 
-import numpy as np
-liste = [1,2,3,4]
-liste2 = [5,6,7,8]
-
-print(np.argmax(liste))

@@ -145,6 +145,9 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
             return False
 
+    def sim_copy(self):
+        return Game(self.size, self.player)
+
     def move(self, move): #places a player
         if self.can_move(move):
             x_pos = move[0]

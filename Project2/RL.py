@@ -65,7 +65,7 @@ class RL:
                 
                 if self.game.is_game_over(move):
                     is_game_over = True
-
+                #self.game.visualise()
                 self.game.move(move) # Perform a* on root to produce successor state s*
                 
                 s = self.game.get_board()
@@ -99,8 +99,9 @@ if __name__ == "__main__":
     exploration_constant = 1
     tree = 1
     board = Game(size, player)
+    number_search_games = 2
     montecarlo = MCTS(default_policy, exploration_constant, board)
-    run = RL(100,NN,montecarlo, 10, board,1,player, size)
+    run = RL(100,NN,montecarlo, 10, board,number_search_games,player, size)
     run.RL_algorhitm()
 
 
