@@ -22,19 +22,25 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         board = []
         self.pos = nx.spring_layout(self.graph)  ##creating a set position for every node.
         node_counter = 1
+        move_distribution = []
         for i in range(size):
             row = []
             for j in range(size):
+                move_distribution.append((i,j))
                 row.append(0) ##set empty, and initialise a mapping to the graph object
                 self.graph.add_node(node_counter)
                 self.position_to_node_id[(i,j)] = node_counter
                 self.pos[node_counter] = [ -5*(i) + 5*j , -(i)*5 - 5*j ]
                 node_counter += 1
             board.append(row)
+        self.move_distribution = move_distribution
         return board ## returns a n x n dimensional board, which is a 45 degree rotation of the hexagonal board (n is the size)
 
     def get_board(self):
         return self
+    
+    def get_move_distribution(self):
+        return self.move_distribution
 
     def get_node_id(self, position): ##position on form (x,y)
         return self.position_to_node_id[position]
@@ -83,8 +89,8 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
     # Can use parameters player_id, move ?
     def is_game_over(self, position): #position should be on the form (x_pos, y_pos)
-            player_id = 2 if self.player == 1 else 1
-
+            #player_id = 2 if self.player == 1 else 1
+            player_id = self.player
             neighbours = self.get_neighbours(position)
             values =[]
 
@@ -133,7 +139,8 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                         if j == len(self.board) -1 :
                             end = True
                 if start and end:
-                    print("Player ", player_id, " won!!!")
+                    #print("Player ", player_id, " won!!!")
+                    return self.player
                 return start and end
 
             return False
@@ -142,7 +149,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         if self.can_move(move):
             x_pos = move[0]
             y_pos = move[1]
-            print("player ", self.player, "placed a piece on : ", move)
+            #print("player ", self.player, "placed a piece on : ", move)
             self.board[x_pos][y_pos] = self.player
             if self.player == 1:
                 self.player = 2
@@ -173,6 +180,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         for row in self.board:
             result += "".join(map(str,row))
         return result
+
 
     def visualise(self):
         colour_map = []
