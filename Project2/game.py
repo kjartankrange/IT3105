@@ -38,7 +38,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
     def get_board(self):
         return self
-    
+
     def get_move_distribution(self):
         return self.move_distribution
 
@@ -89,8 +89,8 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
     # Can use parameters player_id, move ?
     def is_game_over(self, position): #position should be on the form (x_pos, y_pos)
-            #player_id = 2 if self.player == 1 else 1
-            player_id = self.player
+            player_id = 2 if self.player == 1 else 1
+            #player_id = self.player
             neighbours = self.get_neighbours(position)
             values =[]
 
@@ -140,16 +140,15 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                             end = True
                 if start and end:
                     #print("Player ", player_id, " won!!!")
-                    return self.player
+                    
+                    return player_id
                 return start and end
 
             return False
 
-    def sim_copy(self):
-        return Game(self.size, self.player)
-
     def move(self, move): #places a player
         if self.can_move(move):
+
             x_pos = move[0]
             y_pos = move[1]
             #print("player ", self.player, "placed a piece on : ", move)
@@ -218,5 +217,4 @@ if __name__ == "__main__":
 
         move = random.choice(g.get_valid_actions())
         g.move( move)
-        g.visualise()
-
+    g.visualise()
