@@ -95,9 +95,9 @@ class RL:
 if __name__ == "__main__":
     NN = 0
     player = 1
-    size = 4
+    size = 5
     default_policy = None
-    exploration_constant = 1
+    exploration_constant = 1.4
     board = Game(size, player)
     number_search_games = 2000
     number_actual_games = 1
