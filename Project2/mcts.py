@@ -33,16 +33,18 @@ class MCTS:
                 distribution[index] = 0
             else:
                 distribution[index] = root_node.values[action][1]/root_node.N
+        print(distribution)
+        print(sum(distribution))
         return distribution
 
 
     def simulate(self, board):
         board_copy = deepcopy(board)
-        board_copy.visualise()
         path = self.sim_tree(board_copy)         ##if test?
-        if path:
+        if path and board_copy.get_valid_actions():
             z = self.sim_default(board_copy)
             self.backup(path, z)
+            print(path)
 
 
 
@@ -57,7 +59,7 @@ class MCTS:
             if state not in self.nodes.keys():
                 node = Node(board.get_player(), valid_actions)
                 self.nodes[state] = node
-                path.append(node)
+                #path.append(node)
                 return path
             node = self.nodes.get(state)#Node(board.get_player(), valid_actions)
             path.append(node)
@@ -70,25 +72,22 @@ class MCTS:
         return path
 
 
-
-    def sim_default(self, board):
+    #Rollout
+    def sim_default(self, board): #TODO VI MÅ REGISTRERE NODER HER MED NODE.ACTION HER, ELLERS FINS DE IKKE NÅR VI BACKUPER
         #TODO use policy to find move later
         #action = self.default_policy
-        valid_actions = board.get_valid_actions()
-        if not valid_actions: ## gets error here
-            return
+        """
+        if not board.get_valid_actions():
+            return board.is_game_over(action)
+        """
         action = random.choice(board.get_valid_actions())
-        c=0
-        while not board.is_game_over(action):
-            board.move(action)
+        while (not board.is_game_over(action)):
             #action = self.default_policy
-            if board.get_valid_actions():
-                action = random.choice(board.get_valid_actions())
-                c+=1
-                print(c)
-            board.visualise()
-        board.move(action)
-        board.visualise()
+            if not board.get_valid_actions():
+                break
+            action = random.choice(board.get_valid_actions())
+            board.move(action)
+        #board.move(action)
         return board.is_game_over(action) ## returns the winner, 1 for player 1, 2 for player 2.
 
 
