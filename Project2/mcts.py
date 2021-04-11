@@ -33,8 +33,8 @@ class MCTS:
                 distribution[index] = 0
             else:
                 distribution[index] = root_node.values[action][1]/root_node.N
-        print(distribution)
-        print(sum(distribution))
+        #print(distribution)
+        #print(sum(distribution))
         return distribution
 
 
@@ -44,7 +44,7 @@ class MCTS:
         if path and board_copy.get_valid_actions():
             z = self.sim_default(board_copy)
             self.backup(path, z)
-            print(path)
+            #print(path)
 
 
 

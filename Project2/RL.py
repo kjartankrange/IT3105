@@ -41,7 +41,8 @@ class RL:
             is_game_over = False
             B_a = self.game.get_board()
             root = B_a
-            while not is_game_over: # While Ba not in a final state:
+            move = (2,2)
+            while not self.game.is_game_over(move): # While Ba not in a final state:
                 """
                 MCTS.board = starting_board_state # Initialize Monte Carlo game board (Bmc) to same state as root.
                 
@@ -61,9 +62,10 @@ class RL:
 
                 #move = random.choice(self.game.get_valid_actions()) #self.game.get_valid_actions()[argmax(replay_buffer[root])] # Choose actual move (a*) based on D
                 move = self.game.get_move_distribution()[np.argmax(replay_buffer[root])]
-                
+                """
                 if self.game.is_game_over(move):
                     is_game_over = True
+                """
                 #self.game.visualise()
                 self.game.move(move) # Perform a* on root to produce successor state s*
                 
@@ -93,14 +95,15 @@ class RL:
 if __name__ == "__main__":
     NN = 0
     player = 1
-    size = 5
+    size = 4
     default_policy = None
     exploration_constant = 1
     board = Game(size, player)
-    number_search_games = 500
-    number_actual_games = 10
+    number_search_games = 2000
+    number_actual_games = 1
+    save_interval = 100
     montecarlo = MCTS(default_policy, exploration_constant, board)
-    run = RL(100,NN,montecarlo, number_actual_games, board,number_search_games,player, size)
+    run = RL(save_interval,NN,montecarlo, number_actual_games, board,number_search_games,player, size)
     run.RL_algorhitm()
 
 

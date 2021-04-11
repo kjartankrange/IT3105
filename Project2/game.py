@@ -15,7 +15,6 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         self.board = self.create_board(size)
         self.neighbours = self.create_neighbours(size)
         self.goal_nodes = self.create_goal_nodes()
-        self.counter = 1
 
 
 
@@ -90,7 +89,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
     # Can use parameters player_id, move ?
     def is_game_over(self, position): #position should be on the form (x_pos, y_pos)
-            player_id = self.get_player_to_move()
+            player_id = 2 if self.player == 1 else 1
             #player_id = self.player
             neighbours = self.get_neighbours(position)
             values =[]
@@ -141,9 +140,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                             end = True
                 if start and end:
                     #print("Player ", player_id, " won!!!")
-                    #print("Player ", player_id, " won!!!")
-                    #print(filled_cells)
-                    #print(position)
+                    
                     return 1 if player_id == 1 else -1
                 return start and end
 
@@ -155,17 +152,16 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
             x_pos = move[0]
             y_pos = move[1]
             #print("player ", self.player, "placed a piece on : ", move)
-            self.board[x_pos][y_pos] = self.get_player_to_move()
-            self.counter += 1
+            self.board[x_pos][y_pos] = self.player
             if self.player == 1:
                 self.player = 2
             elif self.player == 2:
                 self.player = 1
         else:
-            raise Exception("Invalid move", move, self.get_state())
+            raise Exception("Invalid move")
 
-    def get_player_to_move(self):
-        return 1 if self.counter % 2 == 1 else 2
+    def get_player(self):
+        return self.player
 
     def get_valid_actions(self):
         valid_actions = []
@@ -222,4 +218,22 @@ if __name__ == "__main__":
 
             move = random.choice(g.get_valid_actions())
             g.move( move)
-        g.visualise()
+        #g.visualise()
+        
+
+if __name__ == "__main__":
+    for c in range(500):
+        import random
+        g = Game(5, 1)
+
+        move = random.choice(g.get_valid_actions())
+
+        #g.move( move)
+
+        while not g.is_game_over(move):
+            move = random.choice(g.get_valid_actions())
+    
+                
+                #self.game.visualise()
+            g.move(move)
+
