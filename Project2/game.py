@@ -141,7 +141,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                 if start and end:
                     #print("Player ", player_id, " won!!!")
                     
-                    return player_id
+                    return 1 if player_id == 1 else -1
                 return start and end
 
             return False
@@ -206,15 +206,16 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 # path compression
 
 if __name__ == "__main__":
-    import random
-    g = Game(5, 1)
-
-    move = random.choice(g.get_valid_actions())
-
-    g.move( move)
-    g.visualise()
-    while not g.is_game_over( move):
+    for c in range(500):
+        import random
+        g = Game(5, 1)
 
         move = random.choice(g.get_valid_actions())
+
         g.move( move)
-    g.visualise()
+        #g.visualise()
+        while not g.is_game_over( move):
+
+            move = random.choice(g.get_valid_actions())
+            g.move( move)
+        g.visualise()
