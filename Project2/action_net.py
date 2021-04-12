@@ -29,14 +29,14 @@ class ANN(nn.Module):
        
         #now set layers
         layers = []
-        layers.append(nn.Linear(input_layer,hidden_layers[0]))
+        layers.append(nn.Linear(input_layer+1,hidden_layers[0]))
         layers.append(self.get_torch_activation_function(activation_function))
         for i in range(len(hidden_layers)-1):
             layers.append( nn.Linear(hidden_layers[i], hidden_layers[i+1]) )
             layers.append(self.get_torch_activation_function(activation_function))
         layers.append(nn.Linear(hidden_layers[-1],output_layer) )
         #what should dim be, do we need a dim? 
-        layers.append(nn.Softmax()) 
+        layers.append(nn.Softmax(dim=-1)) 
         
         
         self.model = nn.Sequential( *layers )
@@ -45,42 +45,70 @@ class ANN(nn.Module):
         #Alo it is recommended on the web for cases similar to this like this one 
  
         self.loss = torch.nn.BCELoss(reduction="mean")
-        print(self.model.parameters)
+        
    
+    
     #only function needed to implement from superclass Module
-    def forward(self,input_tensor):
+    def forward(self,input):
+        input_tensor = self._string_to_number_tensor(input)
         with torch.no_grad():
             return self.model(input_tensor)
    
     #input data [state, distribution over possible moves sum(moves) = 1] 
     def fit(self,training_tuples):
         losses = 0
-        #self.model.train() Do we need to add this?
+        accuracy = 0
+        self.model.train() #Do we need to add this?
+        
         for input,target in training_tuples:
-            prediction = forward(torch.Tensor(input))
-            target = torch.Tensor(target)
+            self.optimizer.zero_grad()
+
+            prediction = self.model(self._string_to_number_tensor(input))
+            target = torch.FloatTensor(target)
             
             loss = self.loss(prediction,target)
             losses += loss.item()
-            self.optimizer.zero_grad()
+            
+
+            best_prediction = torch.argmax(prediction).item()
+            best_target =  torch.argmax(target).item()
+            if best_prediction == best_target:
+                accuracy += 1
+            
+            
             loss.backward()
-            optimizer.step()
+            self.optimizer.step()
+
+
         self.model.train(False)
-        return losses/len(training_tuples) #return the average loss over a batch
+        
+        
+        
+        return losses/len(training_tuples) , accuracy/len(training_tuples)  #return the average loss over a batch
 
     #returns index of greedy recommended move
     def default_policy(self,state):
-        return torch.argmax(self.forward(state))
+        mask = [0 if char != "0" else 1 for char in state]
+        mask = torch.FloatTensor(mask)
+
+        
+
+        return torch.argmax(self.forward(state)*mask).item()
 
     #return index of a move stochastically recommended
     def stochastic_policy(self,state):
         stochastic_probabilities = self.forward(state).tolist()
-        
+        mask = [0 if char != "0" else 1 for char in state[1:]]
+        mask = torch.FloatTensor(mask)
+        stoch_probs_legal = self.forward(state)*mask
+        stoch_probs_legal = stoch_probs_legal/torch.sum(stoch_probs_legal)
         indecies = [x for x in range(len(stochastic_probabilities))]
-        
-        print(len(indecies))
-        print(len(stochastic_probabilities))
-        return random.choices(indecies,stochastic_probabilities,k=1)
+        #TODO NORMALIZE RESULTS IN Forward? like should have been done in defualt  pol
+        #print(len(indecies))
+        #print(len(stochastic_probabilities))
+        #print(stoch_probs_legal)
+        #print(random.choices(indecies,stoch_probs_legal,k=1), "choice")
+        return random.choices(indecies,stoch_probs_legal.tolist(),k=1)[0]
     
     #This function is where the learning rate is relevant    
     def set_optimizer(self, optimizer):
@@ -107,13 +135,19 @@ class ANN(nn.Module):
             return nn.ReLU()
         else:
             raise Exception("Invalid Activation Function")
-
+    
+    def _string_to_number_tensor(self,string):
+        lst = []
+        for char in string:
+            lst.append(int(char))
+        return torch.FloatTensor(lst)
+    
     def save(self,training_rounds):
         torch.save(self.state_dict(), f"Project2/cached nets/ann{training_rounds}.pt")
     
     #TODO: When state is loaded make sure a new ANN() has right params. Does load set it  perfectly?
     def load(self,path):
-        self.model = load_state_dict(torch.load(path))
+        self.model = self.load_state_dict(torch.load(path))
 
 if __name__ == "__main__":
     learning_rate = 0.2

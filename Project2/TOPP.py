@@ -1,4 +1,4 @@
-import action_net
+import ANN from action_net
 from game import *
 import random
 class Turnament:

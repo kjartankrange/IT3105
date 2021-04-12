@@ -3,6 +3,7 @@ from game import *
 from copy import deepcopy
 import random
 import numpy as np
+
 class MCTS:
 
 
@@ -80,15 +81,16 @@ class MCTS:
         if not board.get_valid_actions():
             return board.is_game_over(action)
         """
-        action = random.choice(board.get_valid_actions())
-        while (not board.is_game_over(action)):
-            #action = self.default_policy
+        move = random.choice(board.get_valid_actions())
+        while (not board.is_game_over(move)):
+            move_index = self.default_policy.stochastic_policy(board.get_state_and_player())
+            move = board.index_to_move(move_index)
+            
             if not board.get_valid_actions():
                 break
-            action = random.choice(board.get_valid_actions())
-            board.move(action)
+            board.move(move)
         #board.move(action)
-        return board.is_game_over(action) ## returns the winner, 1 for player 1, 2 for player 2.
+        return board.is_game_over(move) ## returns the winner, 1 for player 1, 2 for player 2.
 
 
     def select_move(self, board):
@@ -123,7 +125,7 @@ class Node:
 
 
     def __init__(self, player, valid_actions): #each node corresponds to a state
-        self.N = 1
+        self.N = 0
         self.action = None
         self.values = {}
         for action in valid_actions:
@@ -161,3 +163,16 @@ class Node:
     ## parent?
 
 
+if __name__ == "__main__":
+    game = Game(5, 1)
+    from action_net import ANN
+    learning_rate = 0.2
+    input_layer = 4*4
+    hidden_layers = [30,50]
+    output_layer = input_layer
+    activation_function = "s" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
+    optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
+    M = "m"
+    G = "g"       
+    my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
+    mcts = MCTS(ny_net, 1.4, game)

@@ -187,8 +187,10 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
         for row in self.board:
             result += "".join(map(str,row))
         return result
-
-
+    
+    def get_state_and_player(self):
+        return str(self.player) + self.get_state()
+    
     def visualise(self):
         colour_map = []
         for row in self.board:
