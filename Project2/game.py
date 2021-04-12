@@ -159,6 +159,11 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                 self.player = 1
         else:
             raise Exception("Invalid move")
+    
+    def index_to_move(self,index):
+        row = index // self.size
+        column = index % self.size
+        return (row,column)
 
     def get_player(self):
         return self.player
@@ -222,6 +227,8 @@ if __name__ == "__main__":
         
 
 if __name__ == "__main__":
+    g = Game(5, 1)
+
     for c in range(500):
         import random
         g = Game(5, 1)
@@ -236,4 +243,4 @@ if __name__ == "__main__":
                 
                 #self.game.visualise()
             g.move(move)
-
+    
