@@ -88,10 +88,8 @@ class ANN(nn.Module):
 
     #returns index of greedy recommended move
     def default_policy(self,state):
-        mask = [0 if char != "0" else 1 for char in state]
+        mask = [0 if char != "0" else 1 for char in state][1:]
         mask = torch.FloatTensor(mask)
-
-        
 
         return torch.argmax(self.forward(state)*mask).item()
 
@@ -143,11 +141,11 @@ class ANN(nn.Module):
         return torch.FloatTensor(lst)
     
     def save(self,training_rounds):
-        torch.save(self.state_dict(), f"Project2/cached nets/ann{training_rounds}.pt")
+        torch.save(self.state_dict(), f"cached nets/ann{training_rounds}.pt")
     
     #TODO: When state is loaded make sure a new ANN() has right params. Does load set it  perfectly?
     def load(self,path):
-        self.model = self.load_state_dict(torch.load(path))
+        self.load_state_dict(torch.load(path))
 
 if __name__ == "__main__":
     learning_rate = 0.2
