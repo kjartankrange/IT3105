@@ -157,8 +157,10 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                 self.player = 2
             elif self.player == 2:
                 self.player = 1
+        """
         else:
             raise Exception("Invalid move")
+        """
     
     def index_to_move(self,index):
         row = index // self.size
