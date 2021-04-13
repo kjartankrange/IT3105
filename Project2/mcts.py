@@ -9,11 +9,12 @@ class MCTS:
 
 
 
-    def __init__(self, default_policy, exploration_constant, board):
+    def __init__(self, default_policy, exploration_constant, board,eps):
         self.default_policy = default_policy
         self.exploration_constant = exploration_constant
         self.nodes = {}  # (state) --> node
-        self.nodes[board.get_state()] = Node(board.get_player(), board.get_valid_actions())
+        self.nodes[(board.get_state(), board.get_player())] = Node(board.get_player(), board.get_valid_actions())
+        self.eps = eps
 
     def init_MCT(self):
         self.nodes.clear()
@@ -25,15 +26,15 @@ class MCTS:
             time -= 1
 
         moves = board.get_move_distribution()
-        root_node = self.nodes.get(board.get_state())
+        root_node = self.nodes.get((board.get_state(), board.get_player()))
 
         distribution = np.zeros(len(moves))
         for index in range(len(distribution)):
             action = moves[index]
-            if action not in root_node.values.keys():
+            if (action not in root_node.values):
                 distribution[index] = 0
             else:
-                distribution[index] = root_node.values[action][1]/root_node.N
+                distribution[index] = root_node.values[action][1]/(root_node.N+1)
         #print(distribution)
         #print(sum(distribution))
         return distribution
@@ -57,12 +58,12 @@ class MCTS:
 
         while not board.is_game_over(action):
             valid_actions = board.get_valid_actions()
-            if state not in self.nodes.keys():
+            if (board.get_state(), board.get_player()) not in self.nodes.keys():
                 node = Node(board.get_player(), valid_actions)
-                self.nodes[state] = node
+                self.nodes[(board.get_state(), board.get_player())] = node
                 #path.append(node)
                 return path
-            node = self.nodes.get(state)#Node(board.get_player(), valid_actions)
+            node = self.nodes.get((board.get_state(), board.get_player()))#Node(board.get_player(), valid_actions)
             path.append(node)
             action = self.select_move(board)
             #action = random.choice(board.get_valid_actions())
@@ -77,17 +78,17 @@ class MCTS:
     def sim_default(self, board): #TODO VI MÅ REGISTRERE NODER HER MED NODE.ACTION HER, ELLERS FINS DE IKKE NÅR VI BACKUPER
         #TODO use policy to find move later
         #action = self.default_policy
-        """
-        if not board.get_valid_actions():
-            return board.is_game_over(action)
-        """
+
         move = random.choice(board.get_valid_actions())
         while (not board.is_game_over(move)):
-            move_index = self.default_policy.stochastic_policy(board.get_state_and_player())
-            move = board.index_to_move(move_index)
-            
             if not board.get_valid_actions():
                 break
+            if random.random() < self.eps:
+                move = random.choice(board.get_valid_actions())
+            else:
+                move_index = self.default_policy.stochastic_policy(board.get_state_and_player())
+                move = board.index_to_move(move_index)
+            
             board.move(move)
         #board.move(action)
         return board.is_game_over(move) ## returns the winner, 1 for player 1, 2 for player 2.
@@ -97,10 +98,10 @@ class MCTS:
         valid_moves = board.get_valid_actions()
         player = board.get_player()
         action_values = []
-        node = self.nodes.get(board.get_state())
+        node = self.nodes.get((board.get_state(), board.get_player()))
         if not node:
-            self.nodes[board.get_state()] = Node(board.get_state(), board.get_valid_actions())
-            node = self.nodes[board.get_state()]
+            self.nodes[(board.get_state(), board.get_player())] = Node(board.get_state(), board.get_valid_actions())
+            node = self.nodes[(board.get_state(), board.get_player())]
 
         for move in valid_moves:
             action_values.append(node.compute_value(move, self.exploration_constant, player))
@@ -125,7 +126,7 @@ class Node:
 
 
     def __init__(self, player, valid_actions): #each node corresponds to a state
-        self.N = 0
+        self.N = 1
         self.action = None
         self.values = {}
         for action in valid_actions:

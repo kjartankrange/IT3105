@@ -10,7 +10,7 @@ from action_net import ANN
 class RL:
     
 
-    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size):
+    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps):
         self.save_interval = save_interval
         self.number_actual_games = number_actual_games
         self.starting_board_state = starting_board_state
@@ -19,9 +19,11 @@ class RL:
         self.size = size
         self.batch_size = batch_size
 
+        self.eps = eps
         self.MCTS = montecarlo
         self.game = starting_board_state
         self.model = model
+        self.batch_size_delta = batch_size_delta
 
     def RL_algorhitm(self):
         
@@ -30,6 +32,7 @@ class RL:
         replay_buffer = {} # Clear Replay Buffer (RBUF)
 
         #self.NN.save() #Randomly initialize parameters (weights and biases) of ANET
+        p1 = 0
 
         for g_a in tqdm(range(self.number_actual_games)):
             #TODO skal vi lage nye games eller resete?    
@@ -38,7 +41,7 @@ class RL:
             starting_board_state = self.starting_board_state # s_init ← starting board state
 
             #self.MCTS.init_MCT() # Initialize the Monte Carlo Tree (MCT) to a single root, which represents sinit
-            self.MCTS = MCTS(self.model, exploration_constant, self.game)
+            self.MCTS = MCTS(self.model, exploration_constant, self.game, self.eps)
 
             is_game_over = False
             B_a = self.game.get_state_and_player()
@@ -76,9 +79,13 @@ class RL:
 
                 root = s # root←s*
                 #self.game.visualise()
-
+            if self.game.is_game_over(move)==1:
+                p1+=1
             # Train ANET on a random minibatch of cases from RBUF
-        
+            self.eps *=0.95
+            if g_a== 0:
+                self.model.save(g_a)
+                self.batch_size+=self.batch_size_delta
             training_tuples = []
             sample_keys = random.sample(replay_buffer.keys(), min(len(replay_buffer.keys()),self.batch_size))
             for key in sample_keys:
@@ -86,12 +93,14 @@ class RL:
             loss, accuracy = self.model.fit(training_tuples)  
             print(f"loss: {loss}")
             print(f"accuracy {accuracy}")
-           
+            print(f"p1 won {p1} out of {g_a}")
             #Save ANETS parameters
-            """    
+            
             if (g_a+1) % save_interval == 0:
+                self.model.save(g_a)
+                self.batch_size+=self.batch_size_delta
                 #TODO how to do this? # Save ANET’s current parameters for later use in tournament play.
-            """ 
+            
 
 if __name__ == "__main__":
    
@@ -99,9 +108,9 @@ if __name__ == "__main__":
     player = 1
     size = 4
     input_layer =  size**2
-    learning_rate = 0.05
+    learning_rate = 0.01
     
-    hidden_layers = [128,128, 64, 64]
+    hidden_layers = [16,16]
     output_layer = input_layer
     activation_function = "s" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
     optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
@@ -109,14 +118,16 @@ if __name__ == "__main__":
     G = "g"       
     my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
     batch_size = 100
+    batch_size_delta = 100
     default_policy = None
     exploration_constant = 1
     board = Game(size, player)
-    number_search_games = 500
-    number_actual_games = 10
-    save_interval = 100
-    montecarlo = MCTS(my_net, exploration_constant, board)
-    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size)
+    number_search_games = 1000
+    number_actual_games = 30
+    save_interval = 1
+    eps = 1
+    montecarlo = MCTS(my_net, exploration_constant, board, eps)
+    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps)
     run.RL_algorhitm()
 
 
