@@ -12,61 +12,57 @@ class MCTS:
     def __init__(self, default_policy, exploration_constant, board,eps):
         self.default_policy = default_policy
         self.exploration_constant = exploration_constant
-        self.nodes = {}  # (state) --> node
+        self.nodes = {}  # (state, player) --> node
         self.nodes[(board.get_state(), board.get_player())] = Node(board.get_player(), board.get_valid_actions())
         self.eps = eps
 
     def init_MCT(self):
         self.nodes.clear()
 
-    ## methods: Tree se
+    ## methods: Tree search
     def tree_search(self, time, board):
         while time:
-            self.simulate(board) ## copy states
+            self.simulate(board) #run one iteration
             time -= 1
 
         moves = board.get_move_distribution()
         root_node = self.nodes.get((board.get_state(), board.get_player()))
 
+        #find distribution
         distribution = np.zeros(len(moves))
         for index in range(len(distribution)):
             action = moves[index]
-            if (action not in root_node.values):
+            if action not in root_node.values.keys():
                 distribution[index] = 0
             else:
-                distribution[index] = root_node.values[action][1]/(root_node.N+1)
-        #print(distribution)
-        #print(sum(distribution))
+                distribution[index] = root_node.values[action][1]/(root_node.N if root_node.N!=0 else 1)
         return distribution
 
-
+    #simulation
     def simulate(self, board):
         board_copy = deepcopy(board)
-        path = self.sim_tree(board_copy)         ##if test?
+        path = self.sim_tree(board_copy)  #building tree
         if path and board_copy.get_valid_actions():
-            z = self.sim_default(board_copy)
+            z = self.sim_default(board_copy) #run default policy
             self.backup(path, z)
             #print(path)
 
 
-
+    #walk down montecarlo tree , return path
     def sim_tree(self, board):
-       # t = 0 dont think we need this. used in pseudocode to build trees
         state = board.get_state()
         action = self.select_move(board) ## tree policy
         path = []
 
         while not board.is_game_over(action):
             valid_actions = board.get_valid_actions()
-            if (board.get_state(), board.get_player()) not in self.nodes.keys():
+            if (state, board.get_player()) not in self.nodes.keys():
                 node = Node(board.get_player(), valid_actions)
-                self.nodes[(board.get_state(), board.get_player())] = node
-                #path.append(node)
+                self.nodes[(state, board.get_player())] = node
                 return path
-            node = self.nodes.get((board.get_state(), board.get_player()))#Node(board.get_player(), valid_actions)
+            node = self.nodes.get((state, board.get_player()))
             path.append(node)
             action = self.select_move(board)
-            #action = random.choice(board.get_valid_actions())
             node.set_action(action)
             board.move(action)
             state = board.get_state()
@@ -75,10 +71,7 @@ class MCTS:
 
 
     #Rollout
-    def sim_default(self, board): #TODO VI MÅ REGISTRERE NODER HER MED NODE.ACTION HER, ELLERS FINS DE IKKE NÅR VI BACKUPER
-        #TODO use policy to find move later
-        #action = self.default_policy
-
+    def sim_default(self, board): 
         move = random.choice(board.get_valid_actions())
         while (not board.is_game_over(move)):
             if not board.get_valid_actions():
@@ -90,7 +83,6 @@ class MCTS:
                 move = board.index_to_move(move_index)
             
             board.move(move)
-        #board.move(action)
         return board.is_game_over(move) ## returns the winner, 1 for player 1, 2 for player 2.
 
 
@@ -126,7 +118,7 @@ class Node:
 
 
     def __init__(self, player, valid_actions): #each node corresponds to a state
-        self.N = 1
+        self.N = 0
         self.action = None
         self.values = {}
         for action in valid_actions:

@@ -10,7 +10,7 @@ from action_net import ANN
 class RL:
     
 
-    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps):
+    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta):
         self.save_interval = save_interval
         self.number_actual_games = number_actual_games
         self.starting_board_state = starting_board_state
@@ -20,6 +20,7 @@ class RL:
         self.batch_size = batch_size
 
         self.eps = eps
+        self.eps_delta = eps_delta
         self.MCTS = montecarlo
         self.game = starting_board_state
         self.model = model
@@ -82,7 +83,7 @@ class RL:
             if self.game.is_game_over(move)==1:
                 p1+=1
             # Train ANET on a random minibatch of cases from RBUF
-            self.eps *=0.95
+            self.eps *=self.eps_delta
             if g_a== 0:
                 self.model.save(g_a)
                 self.batch_size+=self.batch_size_delta
@@ -112,22 +113,22 @@ if __name__ == "__main__":
     
     hidden_layers = [16,16]
     output_layer = input_layer
-    activation_function = "s" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
+    activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
     optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
     M = "m"
     G = "g"       
     my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
-    batch_size = 100
-    batch_size_delta = 100
-    default_policy = None
+    batch_size = 16
+    batch_size_delta = 16
     exploration_constant = 1
     board = Game(size, player)
-    number_search_games = 1000
-    number_actual_games = 30
+    number_search_games = 500
+    number_actual_games = 100
     save_interval = 1
-    eps = 1
+    eps = 0.9
+    eps_delta = 0.9
     montecarlo = MCTS(my_net, exploration_constant, board, eps)
-    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps)
+    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta)
     run.RL_algorhitm()
 
 
