@@ -10,7 +10,7 @@ from action_net import ANN
 class RL:
     
 
-    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta):
+    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta,save_file):
         self.save_interval = save_interval
         self.number_actual_games = number_actual_games
         self.starting_board_state = starting_board_state
@@ -25,6 +25,7 @@ class RL:
         self.game = starting_board_state
         self.model = model
         self.batch_size_delta = batch_size_delta
+        self.save_file = save_file
 
     def RL_algorhitm(self):
         
@@ -85,7 +86,7 @@ class RL:
             # Train ANET on a random minibatch of cases from RBUF
             self.eps *=self.eps_delta
             if g_a== 0:
-                self.model.save(g_a)
+                self.model.save(0)
                 self.batch_size+=self.batch_size_delta
             training_tuples = []
             sample_keys = random.sample(replay_buffer.keys(), min(len(replay_buffer.keys()),self.batch_size))
@@ -95,12 +96,15 @@ class RL:
             print(f"loss: {loss}")
             print(f"accuracy {accuracy}")
             print(f"p1 won {p1} out of {g_a}")
+            if self.save_file:
+                with open("data.txt","a") as f:
+                    f.write(f"{loss},{accuracy}\n")
+
             #Save ANETS parameters
             
             if (g_a+1) % save_interval == 0:
-                self.model.save(g_a)
+                self.model.save(g_a+1)
                 self.batch_size+=self.batch_size_delta
-                #TODO how to do this? # Save ANET’s current parameters for later use in tournament play.
             
 
 if __name__ == "__main__":
@@ -108,27 +112,30 @@ if __name__ == "__main__":
     
     player = 1
     size = 4
+    number_actual_games = 100
     input_layer =  size**2
-    learning_rate = 0.01
+    learning_rate = 0.001
     
-    hidden_layers = [16,16]
+    hidden_layers = [128,64]
     output_layer = input_layer
     activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
     optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
-    M = "m"
-    G = "g"       
-    my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
-    batch_size = 16
-    batch_size_delta = 16
+    M = number_actual_games
+    my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G="")
+
+    batch_size = 500
+    batch_size_delta = 0
     exploration_constant = 1
     board = Game(size, player)
     number_search_games = 500
-    number_actual_games = 100
-    save_interval = 1
+    save_interval = number_actual_games/M
     eps = 0.9
-    eps_delta = 0.9
+    eps_delta = 0.99
+
+    record_training = True
+
     montecarlo = MCTS(my_net, exploration_constant, board, eps)
-    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta)
+    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta, record_training)
     run.RL_algorhitm()
 
 
