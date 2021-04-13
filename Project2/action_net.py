@@ -5,9 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 import random
+import pathlib
 
 """
-
 • In the ANET, the learning rate, the number of hidden layers and neurons per layer, 
     along with any of the following activation functions for hidden nodes: linear, sigmoid, tanh, RELU.
 • The optimizer in the ANET, with (at least) the following options all available: 
@@ -20,7 +20,7 @@ starting with an untrained net prior to episode 1, at a fixed interval throughou
 
 class ANN(nn.Module):
     
-    def __init__(self,learning_rate, input_layer, hidden_layers, output_layer, activation_function, optimizer, M, G):
+    def __init__(self,learning_rate, input_layer, hidden_layers, output_layer, activation_function, optimizer, M, G,loss_function="b"):
         super(ANN,self).__init__()
         self.learning_rate = learning_rate
         self.activation_function = activation_function
@@ -43,9 +43,13 @@ class ANN(nn.Module):
         self.optimizer = self.set_optimizer(optimizer)
         #We have used binary cross entropy ass it seemed most fitting, chosen as it is quicker to differentiate than sigmoid
         #Alo it is recommended on the web for cases similar to this like this one 
- 
-        self.loss = torch.nn.BCELoss(reduction="mean")
-        
+       
+        if loss_function.lower() in ["bce","b"]:
+            self.loss = torch.nn.BCELoss(reduction="mean")
+            self.loss_function = "b"
+        else:
+            self.loss = torch.nn.KLDivLoss(reduction="batchmean")
+            self.loss_function = "KLD"
    
     
     #only function needed to implement from superclass Module
@@ -59,14 +63,18 @@ class ANN(nn.Module):
         losses = 0
         accuracy = 0
         self.model.train() #Do we need to add this?
-        
+       
         for input,target in training_tuples:
             self.optimizer.zero_grad()
 
             prediction = self.model(self._string_to_number_tensor(input))
             target = torch.FloatTensor(target)
             
-            loss = self.loss(prediction,target)
+            if self.loss_function == "b":
+                loss = self.loss(prediction,target)
+            else:
+                loss = self.loss(F.log_softmax(prediction,-1),target) 
+            
             losses += loss.item()
             
 
@@ -140,10 +148,10 @@ class ANN(nn.Module):
             lst.append(int(char))
         return torch.FloatTensor(lst)
     
-    def save(self,training_rounds):
-        torch.save(self.state_dict(), f"cached nets/ann{training_rounds}.pt")
     
-    #TODO: When state is loaded make sure a new ANN() has right params. Does load set it  perfectly?
+    def save(self,save_string):
+        torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/cached nets/2testingann{save_string}_lf={self.loss_function}.pt")
+    
     def load(self,path):
         self.load_state_dict(torch.load(path))
 
