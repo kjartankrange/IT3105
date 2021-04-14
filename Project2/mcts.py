@@ -1,5 +1,4 @@
 from game import *
-#from Tree import *
 from copy import deepcopy
 import random
 import numpy as np
@@ -16,8 +15,7 @@ class MCTS:
         self.nodes[(board.get_state(), board.get_player())] = Node(board.get_player(), board.get_valid_actions())
         self.eps = eps
 
-    def init_MCT(self):
-        self.nodes.clear()
+
 
     ## methods: Tree search
     def tree_search(self, time, board):
@@ -35,20 +33,20 @@ class MCTS:
             if action not in root_node.values.keys():
                 distribution[index] = 0
             else:
+                #how much each action in a state is visited, on average
                 distribution[index] = root_node.values[action][1]/(root_node.N if root_node.N!=0 else 1)
         return distribution
 
-    #simulation
+    #simulation, init and build tree
     def simulate(self, board):
         board_copy = deepcopy(board)
         path = self.sim_tree(board_copy)  #building tree
         if path and board_copy.get_valid_actions():
             z = self.sim_default(board_copy) #run default policy
             self.backup(path, z)
-            #print(path)
 
 
-    #walk down montecarlo tree , return path
+    #walk down montecarlo tree, add leafnode , return path
     def sim_tree(self, board):
         state = board.get_state()
         action = self.select_move(board) ## tree policy
@@ -56,6 +54,8 @@ class MCTS:
 
         while not board.is_game_over(action):
             valid_actions = board.get_valid_actions()
+            
+            #if new state, add leaf-node to tree
             if (state, board.get_player()) not in self.nodes.keys():
                 node = Node(board.get_player(), valid_actions)
                 self.nodes[(state, board.get_player())] = node
@@ -70,7 +70,7 @@ class MCTS:
         return path
 
 
-    #Rollout
+    #Rollout, from leaf node
     def sim_default(self, board): 
         move = random.choice(board.get_valid_actions())
         while (not board.is_game_over(move)):
@@ -85,24 +85,26 @@ class MCTS:
             board.move(move)
         return board.is_game_over(move) ## returns the winner, 1 for player 1, 2 for player 2.
 
-
+    # Tree policy 
     def select_move(self, board):
-        valid_moves = board.get_valid_actions()
         player = board.get_player()
         action_values = []
         node = self.nodes.get((board.get_state(), board.get_player()))
+        valid_moves = list(node.values.keys())
+
         if not node:
             self.nodes[(board.get_state(), board.get_player())] = Node(board.get_state(), board.get_valid_actions())
             node = self.nodes[(board.get_state(), board.get_player())]
 
         for move in valid_moves:
             action_values.append(node.compute_value(move, self.exploration_constant, player))
+
         if player == 1:
-            return valid_moves[np.argmax(action_values)]
+            return valid_moves[np.argmax(action_values)] # p1 moves
         else:
-            return valid_moves[np.argmin(action_values)]
+            return valid_moves[np.argmin(action_values)] # opponent moves
 
-
+    #Backpropagation
     def backup(self, nodes, z): #nodes is a list of nodes representing the states, z is the end value
         
         for node in nodes: #node.action is prev action
@@ -124,19 +126,24 @@ class Node:
         for action in valid_actions:
             self.values[action] =  [0,0] ## Q(s,a), N(s,a)
 
+    #update value of action_visit in backprop
     def update_action_visit(self, action):
         self.values[action][1]  += 1
 
+    #update value in backprop
     def update_value(self, action, z):
         q = self.values[action][0]
         self.values[action][0] += (z-q)/self.values[action][1]
 
+    #node visited
     def update_state_visit(self):
         self.N += 1
 
+    #set prev aciton
     def set_action(self, action):
         self.action = action
 
+    #exploration constant determines how much value of node changes when visited
     def compute_value(self, action, exploration_constant, player):
         if player == 1:
             return self.values[action][0] + exploration_constant * sqrt(log(self.N if self.N > 0 else 1) / (self.values[action][1]+1)) # should we return zero or + by 1?
@@ -146,26 +153,3 @@ class Node:
 
 
 
-
-    ## Needs list of children
-    ## needs q and n (q being the accumulated scores of visiting this node, n the number of visits)
-    ## needs add children
-    ## needs move taken as an attribute
-    ## score, if it is a leaf node (i.e representing an end state of the board)
-    ## what about the exploration constant??
-    ## parent?
-
-
-if __name__ == "__main__":
-    game = Game(5, 1)
-    from action_net import ANN
-    learning_rate = 0.2
-    input_layer = 4*4
-    hidden_layers = [30,50]
-    output_layer = input_layer
-    activation_function = "s" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
-    optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
-    M = "m"
-    G = "g"       
-    my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
-    mcts = MCTS(ny_net, 1.4, game)

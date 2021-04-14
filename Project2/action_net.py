@@ -95,8 +95,8 @@ class ANN(nn.Module):
         self.model.train(False)
         
         
-        
-        return losses/len(training_tuples) , accuracy/len(training_tuples)  #return the average loss over a batch
+        #losses/len(training_tuples) losses over batch size to show clear trend during demo
+        return losses/len(training_tuples)  , accuracy/len(training_tuples)  #return the average loss over a batch
 
     #returns index of greedy recommended move
     def default_policy(self,state):
@@ -153,19 +153,7 @@ class ANN(nn.Module):
         return torch.FloatTensor(lst)
     
     
-    def save(self,name_of_simul,iteration):
-        size = 4
-        input_layer =  size**2
-        learning_rate = 0.001
-        
-        hidden_layers = [128,64]
-        output_layer = input_layer
-        activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
-        optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
-        M = "m"
-
-        
-        
+    def save(self,name_of_simul,iteration):                
         torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/cached nets/{name_of_simul}:{iteration}:{self.save_string}")
     
     def load(self,path):

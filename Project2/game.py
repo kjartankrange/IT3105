@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import random
 
 
 class Game:  #Class for handling game logic and visualisation of a gamestate.
@@ -30,7 +31,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                 row.append(0) ##set empty, and initialise a mapping to the graph object
                 self.graph.add_node(node_counter)
                 self.position_to_node_id[(i,j)] = node_counter
-                self.pos[node_counter] = [ -5*(i) + 5*j , -(i)*5 - 5*j ]
+                self.pos[node_counter] = [ -5*(i) + 5*j , -(i)*5 - 5*j ] # Setter koordinatene til hver node i networkx objektet
                 node_counter += 1
             board.append(row)
         self.move_distribution = move_distribution
@@ -157,10 +158,11 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
                 self.player = 2
             elif self.player == 2:
                 self.player = 1
-        """
+        
         else:
-            raise Exception("Invalid move")
-        """
+            self.move(random.choice(self.get_valid_actions()))
+            #raise Exception("Invalid move")
+        
     
     def index_to_move(self,index):
         row = index // self.size
