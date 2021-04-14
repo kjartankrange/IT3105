@@ -193,7 +193,7 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
     def get_state_and_player(self):
         return str(self.player) + self.get_state()
     
-    def visualise(self):
+    def visualise(self, delay=False):
         colour_map = []
         for row in self.board:
             for node in row:
@@ -206,7 +206,13 @@ class Game:  #Class for handling game logic and visualisation of a gamestate.
 
         vis = nx.draw(self.graph, self.pos, node_color =colour_map,
                        node_size=700)
-        plt.show()
+        if delay:
+            plt.show(block = False)
+            plt.pause(delay)
+            plt.close()
+        else:
+            plt.show(block = True)
+
 
 #data structure: array of player . are connected if same player
 
