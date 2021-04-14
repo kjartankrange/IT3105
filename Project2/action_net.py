@@ -26,7 +26,8 @@ class ANN(nn.Module):
         self.activation_function = activation_function
         self.M = M
         self.G = G
-       
+        
+        
         #now set layers
         layers = []
         layers.append(nn.Linear(input_layer+1,hidden_layers[0]))
@@ -38,9 +39,12 @@ class ANN(nn.Module):
         #what should dim be, do we need a dim? 
         layers.append(nn.Softmax(dim=-1)) 
         
+        #String for loading net later
+        self.save_string = f"{learning_rate}_{input_layer}_{hidden_layers}_{output_layer}_{activation_function}_{optimizer}_{loss_function}.pt"
         
         self.model = nn.Sequential( *layers )
         self.optimizer = self.set_optimizer(optimizer)
+        
         #We have used binary cross entropy ass it seemed most fitting, chosen as it is quicker to differentiate than sigmoid
         #Alo it is recommended on the web for cases similar to this like this one 
        
@@ -149,8 +153,20 @@ class ANN(nn.Module):
         return torch.FloatTensor(lst)
     
     
-    def save(self,save_string):
-        torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/cached nets/2testingann{save_string}_lf={self.loss_function}.pt")
+    def save(self,name_of_simul,iteration):
+        size = 4
+        input_layer =  size**2
+        learning_rate = 0.001
+        
+        hidden_layers = [128,64]
+        output_layer = input_layer
+        activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
+        optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
+        M = "m"
+
+        
+        
+        torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/cached nets/{name_of_simul}:{iteration}:{self.save_string}")
     
     def load(self,path):
         self.load_state_dict(torch.load(path))

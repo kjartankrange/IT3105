@@ -4,7 +4,10 @@ import random
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-#import pyplot
+import pathlib
+import glob
+
+
 
 net_wins = 0
 games = 0
@@ -71,7 +74,7 @@ class Counter:
         self.net_wins = 0
         self.games = 0
 
-def round_robin(nets, G, interval):
+def round_robin(nets, G, interval,name_of_simulation,DEMO_LOADER):
     for j in range(1,nets,interval):
         size = 4
         input_layer =  size**2
@@ -88,7 +91,7 @@ def round_robin(nets, G, interval):
         net1 = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
         net1.load(f"cached nets/testingann{j}_lf=b.pt")
         """
-        net1 = net_loader(j)
+        net1 = net_loader(name_of_simulation,j,DEMO_LOADER)
 
         for i in range(1,nets,interval):
             if i == j:
@@ -97,7 +100,7 @@ def round_robin(nets, G, interval):
             net2 = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
             net2.load(f"cached nets/testingann{i}_lf=b.pt")
             """
-            net2 = net_loader(i)
+            net2 = net_loader(name_of_simulation,i,DEMO_LOADER)
             rounds = 1
             round_interval = 1
             tournament = Tournament(net1, net2,rounds, round_interval, size, counter, G)
@@ -110,18 +113,44 @@ def round_robin(nets, G, interval):
     plt.show()
 
 
-def net_loader(i):
-    nets = []
-    size = 4
-    input_layer =  size**2
-    learning_rate = 0.001
+def net_loader(name_of_simulation,i,DEMO_LOADER):
+    if DEMO_LOADER: 
+        
+        size = 4
+        number_actual_games = 100
+        input_layer =  size**2
+        learning_rate = 0.001
+        
+        hidden_layers = [128,64]
+        output_layer = input_layer
+        activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
+        optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
+        M = number_actual_games
+        net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G="")
+        net.load(f"{pathlib.Path(__file__).parent.absolute()}/demo nets/testingann{i}_lf=b.pt")  
+        return net    
+        
+    folder_name, name_of_simulation =  name_of_simulation.split(":")
+    file_name = glob.glob(f"{pathlib.Path(__file__).parent.absolute()}/{folder_name}/{name_of_simulation}:{i}*")[0]
     
-    hidden_layers = [128,64]
-    output_layer = input_layer
-    activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
-    optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
-    net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M=0,G=0)
-    net.load(f"cached nets/testingann{i}_lf=b.pt")
+    with open(file_name, "r") as f:
+        
+        meta_data = file_name.split(":")[2].split("_")
+        learning_rate = float(meta_data[0])
+        input_layer = int(meta_data[1])
+        hidden_layers = []
+        for layer in meta_data[2][1:-1].split(","):
+            hidden_layers.append(int(layer))
+        output_layer = int(meta_data[3])
+        activation_function = meta_data[4]
+        optimizer = meta_data[5]
+        loss_function = meta_data[6].split(".")[0]
+    
+    
+    M = "m"
+    g = "g"
+    net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,g,loss_function)
+    net.load(file_name)
 
     return net
 
@@ -129,7 +158,16 @@ def net_loader(i):
 
 if __name__ == "__main__":
     resultinglist = []
-    nets = 85
-    interval = 20
-    G = 20 #number of games between any two agents       
-    round_robin(nets, G, interval)
+    nets = 84
+    interval = 1
+    G = 1 #number of games between any two agents
+    folder_to_load = "cached nets/"
+    name_of_simulation = "dette_er_demo"
+    
+    DEMO_LOADER = True #Set to true too run pretrained simulation in demo nets
+    if DEMO_LOADER:
+        #set variablene over inn her @audun og kjør sånn at når demo_loader er true så bare får vi riktig
+
+    file_location = folder_to_load + ":" + name_of_simulation
+
+    round_robin(nets, G, interval,file_location,DEMO_LOADER)

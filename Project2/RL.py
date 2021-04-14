@@ -10,7 +10,7 @@ from action_net import ANN
 class RL:
     
 
-    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta,save_file, visualise):
+    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta,save_file, visualise, name_of_simulation):
         self.save_interval = save_interval
         self.number_actual_games = number_actual_games
         self.starting_board_state = starting_board_state
@@ -27,6 +27,7 @@ class RL:
         self.batch_size_delta = batch_size_delta
         self.save_file = save_file
         self.visualise = visualise
+        self.name_of_simulation = name_of_simulation
 
     def RL_algorhitm(self):
         
@@ -93,7 +94,7 @@ class RL:
             # Train ANET on a random minibatch of cases from RBUF
             self.eps *=self.eps_delta
             if g_a== 0:
-                self.model.save(0)
+                self.model.save(self.name_of_simulation,0)
                 self.batch_size+=self.batch_size_delta
             training_tuples = []
             sample_keys = random.sample(replay_buffer.keys(), min(len(replay_buffer.keys()),self.batch_size))
@@ -103,6 +104,7 @@ class RL:
             print(f"loss: {loss}")
             print(f"accuracy {accuracy}")
             print(f"p1 won {p1} out of {g_a}")
+            
             if self.save_file:
                 with open("data.txt","a") as f:
                     f.write(f"{loss},{accuracy}\n")
@@ -110,7 +112,7 @@ class RL:
             #Save ANETS parameters
             
             if (g_a+1) % save_interval == 0:
-                self.model.save(g_a+1)
+                self.model.save(self.name_of_simulation,g_a+1)
                 self.batch_size+=self.batch_size_delta
             
 
@@ -129,6 +131,8 @@ if __name__ == "__main__":
     optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
     M = number_actual_games
     my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G="")
+    
+
 
     batch_size = 500
     batch_size_delta = 0
@@ -141,9 +145,13 @@ if __name__ == "__main__":
 
     record_training = False
 
+    name_of_simulation = "dette_er_demo" #do not use ":" as part of name
     montecarlo = MCTS(my_net, exploration_constant, board, eps)
     visualise = False
-    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta, record_training, visualise)
+
+
+
+    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta, record_training, visualise,name_of_simulation)
     run.RL_algorhitm()
 
 
