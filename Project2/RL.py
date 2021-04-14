@@ -10,7 +10,7 @@ from action_net import ANN
 class RL:
     
 
-    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta,save_file):
+    def __init__(self, save_interval, model, montecarlo,  number_actual_games, starting_board_state,number_search_games, player_to_start, size, batch_size,batch_size_delta, eps, eps_delta,save_file, visualise):
         self.save_interval = save_interval
         self.number_actual_games = number_actual_games
         self.starting_board_state = starting_board_state
@@ -26,6 +26,7 @@ class RL:
         self.model = model
         self.batch_size_delta = batch_size_delta
         self.save_file = save_file
+        self.visualise = visualise
 
     def RL_algorhitm(self):
         
@@ -72,7 +73,9 @@ class RL:
                
                 #self.game.visualise()
                 self.game.move(move) # Perform a* on root to produce successor state s*
-                
+                if visualise:
+                    self.game.visualise(True)
+
                 s = self.game.get_state_and_player()
 
                 B_a = s    # Update Ba to s*
@@ -83,6 +86,10 @@ class RL:
                 #self.game.visualise()
             if self.game.is_game_over(move)==1:
                 p1+=1
+                if visualise:
+                    self.game.visualise(True)
+
+
             # Train ANET on a random minibatch of cases from RBUF
             self.eps *=self.eps_delta
             if g_a== 0:
@@ -132,11 +139,14 @@ if __name__ == "__main__":
     eps = 0.9
     eps_delta = 0.99
 
-    record_training = True
+    record_training = False
 
     montecarlo = MCTS(my_net, exploration_constant, board, eps)
-    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta, record_training)
+    visualise = False
+    run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta, record_training, visualise)
     run.RL_algorhitm()
+
+
 
 
 
