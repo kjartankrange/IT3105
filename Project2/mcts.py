@@ -20,7 +20,8 @@ class MCTS:
     ## methods: Tree search
     def tree_search(self, time, board):
         while time:
-            self.simulate(board) #run one iteration
+            board_copy = deepcopy(board)
+            self.simulate(board_copy) #run one iteration
             time -= 1
 
         moves = board.get_move_distribution()
@@ -39,40 +40,39 @@ class MCTS:
 
     #simulation, init and build tree
     def simulate(self, board):
-        board_copy = deepcopy(board)
-        path = self.sim_tree(board_copy)  #building tree
-        if path and board_copy.get_valid_actions():
-            z = self.sim_default(board_copy) #run default policy
+        path, last_action = self.sim_tree(board)  #building tree
+        if path:
+            z = self.sim_default(board, last_action) #run default policy
             self.backup(path, z)
 
 
     #walk down montecarlo tree, add leafnode , return path
     def sim_tree(self, board):
-        state = board.get_state()
-        action = self.select_move(board) ## tree policy
+        if len(board.get_valid_actions())==0:
+            return []
+        action = random.choice(board.get_valid_actions()) 
         path = []
 
         while not board.is_game_over(action):
             valid_actions = board.get_valid_actions()
             
             #if new state, add leaf-node to tree
-            if (state, board.get_player()) not in self.nodes.keys():
+            if (board.get_state(), board.get_player()) not in self.nodes.keys():
                 node = Node(board.get_player(), valid_actions)
-                self.nodes[(state, board.get_player())] = node
-                return path
-            node = self.nodes.get((state, board.get_player()))
+                self.nodes[(board.get_state(), board.get_player())] = node
+                return path, action
+            node = self.nodes.get((board.get_state(), board.get_player()))
             path.append(node)
             action = self.select_move(board)
             node.set_action(action)
             board.move(action)
-            state = board.get_state()
 
-        return path
+        return path, action
 
 
     #Rollout, from leaf node
-    def sim_default(self, board): 
-        move = random.choice(board.get_valid_actions())
+    def sim_default(self, board, last_action): 
+        move = last_action
         while (not board.is_game_over(move)):
             if not board.get_valid_actions():
                 break
@@ -91,10 +91,6 @@ class MCTS:
         action_values = []
         node = self.nodes.get((board.get_state(), board.get_player()))
         valid_moves = list(node.values.keys())
-
-        if not node:
-            self.nodes[(board.get_state(), board.get_player())] = Node(board.get_state(), board.get_valid_actions())
-            node = self.nodes[(board.get_state(), board.get_player())]
 
         for move in valid_moves:
             action_values.append(node.compute_value(move, self.exploration_constant, player))
