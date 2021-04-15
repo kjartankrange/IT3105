@@ -100,7 +100,7 @@ class RL:
 
             print(f"loss: {loss}")
             print(f"accuracy {accuracy}")
-            print(f"p1 won {p1} out of {g_a}")
+            print(f"p1 won {p1} out of {g_a+1}")
 
             if self.save_file: #save loss and accuracy
                 with open("data.txt","a") as f:
@@ -116,35 +116,35 @@ class RL:
 
 if __name__ == "__main__":
    
-    
+    #Game
     player = 1 
     size = 4 # size of board from 3-10
-    number_actual_games = 5 # episodes / epochs
+    number_actual_games = 200 # episodes / epochs
+    
+    #ANN
     input_layer =  size**2 
     learning_rate = 0.001 # learning rate in NN
-    
-    hidden_layers = [128, 128,64,64] # gives size of net and num of neurons
+    hidden_layers = [128,64] # gives size of net and num of neurons
     output_layer = input_layer
     activation_function = "r" #choices: "linear" OR "l", "sigmoid" OR "s", "tanh" OR "t", "RELU" OR "r"
     optimizer = "ad" #choices: ["Adagrad","ag"], ["SGD","s"]:["RMSprop","r"]:["Adam","ad"]:
     M = number_actual_games # how many games to save?
+    save_interval = number_actual_games/M # how often save?
     my_net = ANN(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G="")
     
-
-
+    #MCTS
     batch_size = 500 # batch size sent to NN
     batch_size_delta = 0 # change in batch size
     exploration_constant = 1 # needed in mcts, how much values change when node action visited
     board = Game(size, player) 
     number_search_games = 500 # games in montecarlo
-    save_interval = number_actual_games/M # how often save?
     eps = 0.9 # starting delta, if 1 => all moves random in mcts rolloiut
     eps_delta = 0.99 #change in delta
 
-    record_training = True # record acc and loss
+    record_training = False # record acc and loss
 
-    name_of_simulation = "dette_er_demo" #do not use ":" as part of name
-    visualise = True # show moves during actual games
+    name_of_simulation = "audun" #do not use ":" as part of name
+    visualise = False # show moves during actual games
     
     montecarlo = MCTS(my_net, exploration_constant, board, eps)
     run = RL(save_interval,my_net,montecarlo, number_actual_games, board,number_search_games,player, size, batch_size, batch_size_delta, eps, eps_delta, record_training, visualise, name_of_simulation)

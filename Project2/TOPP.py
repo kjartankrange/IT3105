@@ -46,11 +46,13 @@ class Tournament:
                 #move = random.choice(game.get_valid_actions())
                 
                 game.move(move)
-                
+                if visualise:
+                    game.visualise(True)
             winner = game.is_game_over(move)
             winner = 2 if winner == -1 else 1 #last round
             self.counter.net_wins += 1 if winner == 1 else 0
             self.counter.games +=1
+            if visualise: game.visualise(True)
         #game.visualise()
         #register winners at each round
 
@@ -138,21 +140,14 @@ def net_loader(name_of_simulation,i,DEMO_LOADER):
 
 if __name__ == "__main__":
     resultinglist = []
-    nets = 200
-    interval = 1
-    start = 0
-    G = 1 #number of games between any two agents
-    folder_to_load = "cached nets/"
-    name_of_simulation = "dette_er_demo"
-    
-    DEMO_LOADER = True #Set to true too run pretrained simulation in demo nets
-
-    if DEMO_LOADER:
-        nets = 201
-        interval = 50
-        start = 0
-        G = 10
+    nets = 201 #DEMO: 201
+    interval = 50 #DEMO: 50
+    start = 0 #DEMO: 0
+    G = 50 #number of games between any two agents
+    folder_to_load = "demo nets" # For DEMO: 
+    name_of_simulation = "audun" # For DEMO: "2300train"
+    visualise = False  # visualise games?
 
     file_location = folder_to_load + ":" + name_of_simulation
 
-    round_robin(nets, G, interval, start,file_location,DEMO_LOADER)
+    round_robin(nets, G, interval, start,file_location,DEMO_LOADER=False)

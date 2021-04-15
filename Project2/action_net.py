@@ -154,7 +154,7 @@ class ANN(nn.Module):
     
     
     def save(self,name_of_simul,iteration):                
-        torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/cached nets/{name_of_simul}:{iteration}:{self.save_string}")
+        torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/demo nets/{name_of_simul}:{iteration}:{self.save_string}")
     
     def load(self,path):
         self.load_state_dict(torch.load(path))
