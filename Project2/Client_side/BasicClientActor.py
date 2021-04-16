@@ -22,7 +22,9 @@ class BasicClientActor(BasicClientActorAbs):
         next_move = tuple(self.pick_random_free_cell(
             state, size=int(math.sqrt(len(state)-1))))
             #Below means blue started
+            player_2_start = False
             if state[0] == 2 and state[1:].count(1) == state[1:].count(2):
+                player_2_start = True
                 translated_state = [1 if x == 2 else 1 for x in state]
                 import numpy as np 
                 np.array(translated_state)
@@ -37,9 +39,19 @@ class BasicClientActor(BasicClientActorAbs):
                     state_string.append("2")
                 else:
                     state_string.append("0")
-            ##improt...
-            net_loader()
+            from TOPP import net_loader
+            
+            net_loader("mattias_sin_beste_simul")
             move = net.default_policy(state_string)
+            if player_2_start: 
+                matrix = []
+                for i in range(len(state[1:]))
+                    row = []
+                    for j in range(len(state[1:])):
+                        row.append((i,j))
+                    matrix.append(row)
+                transposed_moves = np.array(matrix).transpose()
+                move = transposed_moves[move[0]][move[1]]
 
         ############################# 
         #
