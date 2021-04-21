@@ -94,7 +94,6 @@ class Critic_net(nn.Module):
 
 
         self.model.train(False)
-        
         return loss 
 
     #returns index of greedy recommended move

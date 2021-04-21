@@ -22,22 +22,26 @@ class Environment:
         self.t += 0.001
         self._update_location()   
     
-    def reward(self):
-        if self.cart_x == .6:
-            print("OOOOMGMGGGG we MADE IT!!!!!")
-            return 1
+    def game_over(self):
         if self.t < 1:
-            return 0 
+            return 0
+        if self.cart_x == 0.6:
+            return 1
         else:
-            print("Ouffff we lost")
             return -1
+
+    def reward(self):
+        return self.cart_velocity**2 
+       
+    def goal():
+        return 0.6
 
     def plot(self):
         all_x = np.arange(-1.2,0.6,0.001)
         all_y = np.cos(3*(all_x+np.pi/2))
         plt.plot( all_x, all_y )
         plt.plot( [self.cart_x], [np.cos(3*(self.cart_x+np.pi/2))],"ro") 
-        plt.show(block=False)
+        plt.show()
     
     def save_values(self):
         self.cart_positions.append(self.cart_x)

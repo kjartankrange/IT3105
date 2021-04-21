@@ -29,17 +29,17 @@ class Player:
         
         plot_data = []
         x_axis = []
-        for x in tqdm(range(no_episodes)):
+        count_wins = []
+        count_loss = []
+            
+        for i in tqdm(range(no_episodes)):
             
             env = deepcopy(self.environment)
             
-            
-            
-            while not env.reward():
+            while not env.game_over():
                 x = env.cart_x
                 v = env.cart_velocity
-                s = get_flat_state([x,v])
-                env.plot()  
+                s = get_flat_state([x,v]) 
                 action = self.choose_action( [self.critic.forward(s,-1),self.critic.forward(s,0),self.critic.forward(s,1)] , eps)  # pick move from distribution
                 
                 env.update_velocity(action)
@@ -58,12 +58,26 @@ class Player:
                 self.critic.fit(s_a_tup, sp_ap_tup, env.reward(), gamma)
 
                 s = s_prime
+                
+                if env.game_over == 1:
+                    count_wins.append(1) 
+                    if len(count_wins) > 10:
+                        count_wins.pop(0)
+                    print("W")
+                    print( f"winrate: {sum(count_wins)/len(count_wins)}")
+                
+                if env.game_over() == -1:
+                    count_wins.append(0)
+                    if len(count_wins) > 10:
+                        count_wins.pop(0)
+                    print("L")
+                    print( f"winrate: {sum(count_wins)/len(count_wins)}")
+
 
             epsilon *= epsilon_deg
             
-            animator = Animator(env.cart_positions)
-            animator.animate()
-    
+            #env.plot() 
+
             plot_data.append(env.reward)
             x_axis.append(x)
 
@@ -87,8 +101,8 @@ class Player:
         """
     def choose_action(self,QSas, epsilon):
         if random.random() < epsilon:
-            return np.argmax(QSas)-1
-        return random.choice([-1,0,1])
+            return random.choice([-1,0,1])
+        return np.argmax(QSas)-1
     
 
     def visualise(self, actor_c, starting_state, delay):
@@ -123,13 +137,13 @@ if __name__ == "__main__":
 
 
     #4) Number of episodes to run
-    episodes = 20 #no of episodes
+    episodes = 1000 #no of episodes
 
     #9) The discount factor for the actor and critic
     gamma = 0.9 #discount factor
     
     #10) The initial value of ε for the actor’s ε-greedy strategy and ε decay rate.
-    eps = 1 #epsilon
+    eps = 0.9 #epsilon
     eps_deg = 0.9 #epsilon decay, 
     
     #11) A display variable indicating when actual games will be visualized.
