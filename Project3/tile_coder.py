@@ -20,7 +20,7 @@ def create_tilings(feature_range, number_of_tilings, tiles_per_tiling, offsets):
         tiles = []
         for j in range(len(feature_range)):
             feature_range_tile = feature_range[j]
-            tile = create_tiling(feature_range_tile, no_tiles, offset)
+            tile = create_tiling(feature_range_tile, no_tiles, offset[j])
             tiles.append(tile)
         tilings.append(tiles)
     return np.array(tilings)
@@ -40,7 +40,7 @@ def create_tiling(feature_range, tiles_per_feature, offset):
     """
     start = feature_range[0]
     end = feature_range[1]
-    tiling_indexes = np.linspace(start,end,tiles_per_feature)[1:-1] + offset #ommits the first and last value
+    tiling_indexes = np.linspace(start,end,tiles_per_feature+1)[1:-1] + offset #ommits the first and last value
     return tiling_indexes
 
 def get_tile_coding(feature, tilings):
@@ -56,20 +56,37 @@ def get_tile_coding(feature, tilings):
         feature_codings.append(coding)
     return np.array(feature_codings)
 
+from math import sqrt
+def compute_offsets(feature_ranges, no_bins):
+    offsets = []
+    offset_step = []
+    for feature_range_i in feature_ranges:
+        start = feature_range_i[0]   ## assume 2_dim feature ranges
+        end = feature_range_i[1]
+
+        l = max(start-end, end-start)
+        step = l/no_bins
+        offset_step.append(step)
+    for i in range(no_bins):
+        offsets_i = []
+        for j in range(len(feature_ranges)):
+            offset_feature_j = offset_step[j]*i
+            offsets_i.append(offset_feature_j)
+        offsets.append(offsets_i)
+    return offsets
 
 
+def get_matrix(feature):
+    feature_ranges = [[-1.2, 0.6], [-0.07, 0.07]]
+    bins = 9
+    offsets = compute_offsets(feature_ranges, bins)
+
+    number_tilings = 8
+    tilings = create_tilings(feature_ranges, number_tilings, bins, offsets)
+
+    codes = get_tile_coding(feature, tilings)
+    flat_state = [item for sublist in codes for item in sublist]
+    return flat_state
 
 
-feature = [0.2,1]
-
-feature_ranges = [[0,1],[0.,1]]
-number_tilings = 3
-bins = 10
-offsets = [0,0.2,0.4]
-
-tilings = create_tilings(feature_ranges, number_tilings, bins, offsets)
-
-
-coding = get_tile_coding(feature, tilings)
-
-print(coding)
+print(get_matrix([0.1,0.02]))
