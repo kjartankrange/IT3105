@@ -76,7 +76,7 @@ def compute_offsets(feature_ranges, no_bins):
     return offsets
 
 
-def get_matrix(feature):
+def get_flat_state(feature):
     feature_ranges = [[-1.2, 0.6], [-0.07, 0.07]]
     bins = 9
     offsets = compute_offsets(feature_ranges, bins)
@@ -89,4 +89,3 @@ def get_matrix(feature):
     return flat_state
 
 
-print(get_matrix([0.1,0.02]))

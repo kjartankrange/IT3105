@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class Environment: 
 
-    def __init__(self, cart_start_pos=(np.random.random()*0.2*- -0.4), cart_start_velocity=0): 
+    def __init__(self, cart_start_pos=(np.random.random()*0.2*-1 -0.4), cart_start_velocity=0): 
         self.cart_x = cart_start_pos
         self.cart_velocity = cart_start_velocity
         self.t = 0
@@ -17,18 +17,19 @@ class Environment:
         self.save_values()
         
     def update_velocity(self, action):
-        velocity = self.cart_velocity +0.001*action + -0.0025*np.cos(3*self.cart_postions)
+        velocity = self.cart_velocity +0.001*action + -0.0025*np.cos(3*self.cart_x)
         self.cart_velocity = velocity if np.abs(velocity) < 0.07 else velocity/np.abs(velocity)*0.07
         self.t += 0.001
-        update_location()   
+        self._update_location()   
     
     def reward(self):
-        if self.cart_postions == .6:
+        if self.cart_x == .6:
             print("OOOOMGMGGGG we MADE IT!!!!!")
             return 1
         if self.t < 1:
             return 0 
         else:
+            print("Ouffff we lost")
             return -1
 
     def plot(self):
@@ -36,12 +37,23 @@ class Environment:
         all_y = np.cos(3*(all_x+np.pi/2))
         plt.plot( all_x, all_y )
         plt.plot( [self.cart_x], [np.cos(3*(self.cart_x+np.pi/2))],"ro") 
-        plt.show()
+        plt.show(block=False)
     
     def save_values(self):
         self.cart_positions.append(self.cart_x)
+    
+    def plot_round(self):
+        for i in range(len(self.cart_positions)):
+            x_pos = self.cart_positions[i]
+            plt.plot( [x_pos], [np.cos(3*(x_pos+np.pi/2))],"ro",color="red") 
+        
+        plt.plot( all_x, all_y )
 
+
+
+ 
+         
 if __name__ == "__main__":
-    env = Environment(0.01)
+    env = Environment()
     env.plot()
     pass

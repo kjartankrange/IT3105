@@ -1,9 +1,10 @@
 from environment import Environment
 from critic_net import Critic_net
 import numpy as np
+from tile_coder import get_flat_state 
 
-
-from random import *
+from copy import deepcopy
+import random
 import math
 import matplotlib
 import matplotlib.pyplot as plt
@@ -13,7 +14,6 @@ from tqdm import tqdm #progressbar
 
 
 
-random.seed(100)
 
 class Player:
 
@@ -27,41 +27,50 @@ class Player:
     def sarsa(self,  gamma, epsilon, epsilon_deg,
               no_episodes):  # correct function name? should return the actors policies
         
-        self.critic.create_value(starting_state.state())
         plot_data = []
         x_axis = []
         for x in tqdm(range(no_episodes)):
             
-            self.critic.reset_eligibilities() #gives backup to states, how often used, states
-            env = copy.deepcopy(self.environment)
-            s = env.state()
-            action_count = 0
+            env = deepcopy(self.environment)
+            
+            
             
             while not env.reward():
+                x = env.cart_x
+                v = env.cart_velocity
+                s = get_flat_state([x,v])
+                env.plot()  
+                action = self.choose_action( [self.critic.forward(s,-1),self.critic.forward(s,0),self.critic.forward(s,1)] , eps)  # pick move from distribution
                 
+                env.update_velocity(action)
                 
-                action = choose_action( [self.critic.forward(s,-1),self.critic.forward(s,0),self.critic.forward(s,1)] )  # pick move from distribution
+                x = env.cart_x
                 
-                env = env.update_velocity(action)
+                v = env.cart_velocity
                 
+                s_prime = get_flat_state([x,v]) #s prime is (new) state, s is last state                
                 
+                action_prime = self.choose_action( [self.critic.forward(s_prime,-1),self.critic.forward(s_prime,0),self.critic.forward(s_prime,1)],eps )
+                
+                s_a_tup = (s,action)
+                sp_ap_tup = (s_prime, action_prime)
+                
+                self.critic.fit(s_a_tup, sp_ap_tup, env.reward(), gamma)
 
-                
-                s_prime = env.state() #s prime is (new) state, s is last state                
-                
-                self.critic.fit(t.check_game_score(), s, s_prime, delta)
-            
                 s = s_prime
-            epsilon *= epsilon_deg
 
+            epsilon *= epsilon_deg
             
-            plot_data.append(len(t.find_alive_nodes()))
+            animator = Animator(env.cart_positions)
+            animator.animate()
+    
+            plot_data.append(env.reward)
             x_axis.append(x)
 
-          
-
-        fig, ax = plt.subplots()
-        ax.plot(x_axis, plot_data)
+        
+        """
+        #fig, ax = plt.subplots()
+        #ax.plot(x_axis, plot_data)
         #print(plot_data)
 
    
@@ -75,8 +84,8 @@ class Player:
         plt.show()
         if display:
             self.visualise(actor, starting_state, delay)  
-    
-    def make_choice(QSas, epsilon):
+        """
+    def choose_action(self,QSas, epsilon):
         if random.random() < epsilon:
             return np.argmax(QSas)-1
         return random.choice([-1,0,1])
@@ -134,18 +143,18 @@ if __name__ == "__main__":
     dimNN = [] #hidden layers in network
     
     #7) The learning rates for the actor and critic
-    alpha_c = 0.01 #learning rate critic
+    learning_rate = 0.01 #learning rate critic
 
     activation_function = "r" 
 
-    optimizer = "a"   
+    optimizer = "ad"   
     
     
     env = Environment()
     
-    net = Critic_net(learning_rate, 9 , dimNN, 1, activation_function, optimizer,"m","g","m")
+    critic = Critic_net(learning_rate, 17 , dimNN, 1, activation_function, optimizer,"m","g","m")
 
-    player = Player(env, critic_type)
+    player = Player(env, critic)
 
     player.sarsa(gamma, eps, eps_deg, episodes)
 

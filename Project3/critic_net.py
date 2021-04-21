@@ -30,12 +30,16 @@ class Critic_net(nn.Module):
         
         #now set layers
         layers = []
-        layers.append(nn.Linear(input_layer+1,hidden_layers[0]))
-        layers.append(self.get_torch_activation_function(activation_function))
-        for i in range(len(hidden_layers)-1):
-            layers.append( nn.Linear(hidden_layers[i], hidden_layers[i+1]) )
+        if len(hidden_layers) == 0:
+            layers.append(nn.Linear(input_layer,output_layer))
+          
+        else:     
+            layers.append(nn.Linear(input_layer+1,hidden_layers[0]))
             layers.append(self.get_torch_activation_function(activation_function))
-        layers.append(nn.Linear(hidden_layers[-1],output_layer) )
+            for i in range(len(hidden_layers)-1):
+                layers.append( nn.Linear(hidden_layers[i], hidden_layers[i+1]) )
+                layers.append(self.get_torch_activation_function(activation_function))
+            layers.append(nn.Linear(hidden_layers[-1] if len(hidden_layers) != 0 else input_layer,output_layer) )
         #what should dim be, do we need a dim? 
         layers.append(nn.Sigmoid())
         
@@ -54,12 +58,13 @@ class Critic_net(nn.Module):
         else:
             self.loss = torch.nn.KLDivLoss(reduction="batchmean")
             self.loss_function = "KLD"
+        
    
     
     #only function needed to implement from superclass Module
     def forward(self,state, action):
-        state.append(action)
-        input_tensor = torch.FloatTensor(state)
+              
+        input_tensor = torch.FloatTensor(state + [action])
         with torch.no_grad():
             return self.model(input_tensor)
    
@@ -69,12 +74,17 @@ class Critic_net(nn.Module):
         self.model.train() #Do we need to add this?
         state, action = s_a_tup
         state_p, action_p = sp_ap_tup
+        
+        
         self.optimizer.zero_grad()
 
-        prediction = self.forward(state,action)
+        prediction = self.model(torch.FloatTensor(state + [action]))
         
-        target = self.forward(state_p,action_p)
+        target = self.model(torch.FloatTensor(state + [action]))
         
+
+        
+
         #this should be mean_sq_error
         loss = self.loss(prediction, target*gamma + reward) 
         
@@ -140,7 +150,6 @@ class Critic_net(nn.Module):
         for char in string:
             lst.append(int(char))
         return torch.FloatTensor(lst)
-    
     
     def save(self,name_of_simul,iteration):                
         torch.save(self.state_dict(), f"{pathlib.Path(__file__).parent.absolute()}/demo nets/{name_of_simul}:{iteration}:{self.save_string}")
