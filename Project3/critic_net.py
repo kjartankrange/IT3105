@@ -80,21 +80,20 @@ class Critic_net(nn.Module):
 
         prediction = self.model(torch.FloatTensor(state + [action]))
         
-        target = self.model(torch.FloatTensor(state + [action]))
+        target = self.model(torch.FloatTensor(state_p + [action_p]))
         
 
         
 
         #this should be mean_sq_error
-        loss = self.loss(prediction, target*gamma + reward) 
-        
-        
+        loss = self.loss(prediction, target*gamma + 1/reward) 
+                
         loss.backward()
         self.optimizer.step()
 
 
         self.model.train(False)
-        return loss 
+        return loss.item() 
 
     #returns index of greedy recommended move
     def default_policy(self,state):

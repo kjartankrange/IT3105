@@ -31,11 +31,11 @@ class Player:
         x_axis = []
         count_wins = []
         count_loss = []
-            
+        
         for i in tqdm(range(no_episodes)):
             
             env = deepcopy(self.environment)
-            
+            loss = []
             while not env.game_over():
                 x = env.cart_x
                 v = env.cart_velocity
@@ -55,11 +55,12 @@ class Player:
                 s_a_tup = (s,action)
                 sp_ap_tup = (s_prime, action_prime)
                 
-                self.critic.fit(s_a_tup, sp_ap_tup, env.reward(), gamma)
+                loss.append(self.critic.fit(s_a_tup, sp_ap_tup, env.reward(), gamma))
+                
 
                 s = s_prime
                 
-                if env.game_over == 1:
+                if env.game_over() == 1:
                     count_wins.append(1) 
                     if len(count_wins) > 10:
                         count_wins.pop(0)
@@ -72,7 +73,7 @@ class Player:
                         count_wins.pop(0)
                     print("L")
                     print( f"winrate: {sum(count_wins)/len(count_wins)}")
-
+            print(np.average(loss))
 
             epsilon *= epsilon_deg
             

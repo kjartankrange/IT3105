@@ -31,7 +31,12 @@ class Environment:
             return -1
 
     def reward(self):
-        return self.cart_velocity**2 
+        if self.t < 1:
+            return 0.5*self.cart_velocity**2 + 1 #- self.t +np.cos(3*(self.cart_x+np.pi/2))*9.81
+        if self.cart_x == 0.6:
+            return 1
+        else:
+            return -1
        
     def goal():
         return 0.6
