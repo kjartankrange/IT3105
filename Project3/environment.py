@@ -13,7 +13,14 @@ class Environment:
     
     def _update_location(self):
         self.cart_x += self.cart_velocity
-        self.cart_x = 0.6 if self.cart_x >= 0.6 else self.cart_x 
+        if self.cart_x >= 0.6:
+            self.cart_x = 0.6
+
+        elif self.cart_x <= -1.2:
+            self.cart_x = -1.2
+            self.cart_velocity = - self.cart_velocity  #3*(0.001*5 + -0.0025*np.cos(3*self.cart_x))
+
+        
         self.save_values()
         
     def update_velocity(self, action):
@@ -22,31 +29,27 @@ class Environment:
         self.t += 0.001
         self._update_location()   
     
+    def reward(self):
+        if self.cart_x >= .6:
+            print("OOOOMGMGGGG we MADE IT!!!!!")
+            return 0
+        if self.t < 1:
+            return -2*self.t -5/(0.01+1/2 * (1+self.cart_velocity)**2 + 10*(1+np.cos(3*(self.cart_x+np.pi/2))))-1
+        print("Ouffff we lost")
+        return -100
     def game_over(self):
         if self.t < 1:
             return 0
-        if self.cart_x == 0.6:
+        if self.cart_x >= 0.6:
             return 1
-        else:
-            return -1
-
-    def reward(self):
-        if self.t < 1:
-            return 0.5*self.cart_velocity**2 + 1 #- self.t +np.cos(3*(self.cart_x+np.pi/2))*9.81
-        if self.cart_x == 0.6:
-            return 1
-        else:
-            return -1
-       
-    def goal():
-        return 0.6
+        return -1
 
     def plot(self):
         all_x = np.arange(-1.2,0.6,0.001)
         all_y = np.cos(3*(all_x+np.pi/2))
         plt.plot( all_x, all_y )
         plt.plot( [self.cart_x], [np.cos(3*(self.cart_x+np.pi/2))],"ro") 
-        plt.show()
+        plt.show(block=False)
     
     def save_values(self):
         self.cart_positions.append(self.cart_x)
@@ -59,10 +62,3 @@ class Environment:
         plt.plot( all_x, all_y )
 
 
-
- 
-         
-if __name__ == "__main__":
-    env = Environment()
-    env.plot()
-    pass

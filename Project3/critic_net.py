@@ -26,6 +26,7 @@ class Critic_net(nn.Module):
         self.activation_function = activation_function
         self.M = M
         self.G = G
+        self.losses = []
         
         
         #now set layers
@@ -41,7 +42,7 @@ class Critic_net(nn.Module):
                 layers.append(self.get_torch_activation_function(activation_function))
             layers.append(nn.Linear(hidden_layers[-1] if len(hidden_layers) != 0 else input_layer,output_layer) )
         #what should dim be, do we need a dim? 
-        layers.append(nn.Sigmoid())
+        layers.append(nn.Linear(output_layer,1))
         
         #String for loading net later
         self.save_string = f"{learning_rate}_{input_layer}_{hidden_layers}_{output_layer}_{activation_function}_{optimizer}_{loss_function}.pt"
@@ -86,13 +87,16 @@ class Critic_net(nn.Module):
         
 
         #this should be mean_sq_error
-        loss = self.loss(prediction, target*gamma + 1/reward) 
-                
+        loss = self.loss(prediction, target*gamma + reward) 
+        
+        
         loss.backward()
         self.optimizer.step()
 
-
+        self.losses.append(loss.item())
         self.model.train(False)
+        if reward==0 or reward==-100:
+            print(sum(self.losses)/len(self.losses),"loss",prediction.item(),"pred", target.item()+reward,"target")
         return loss.item() 
 
     #returns index of greedy recommended move
@@ -120,7 +124,7 @@ class Critic_net(nn.Module):
     #This function is where the learning rate is relevant    
     def set_optimizer(self, optimizer):
         if optimizer in ["Adagrad","ag"]:
-            return torch.optim.Adagrad(list(self.model.parameters()), lr=self.learning_rate)
+            return torch.optim.Adagrad(list(self.model.parameters()), lr=self.learning_rate,lr_decay=0.05)
         elif optimizer in ["SGD","s"]:
             return torch.optim.SGD(list(self.model.parameters()), lr=self.learning_rate)
         elif optimizer in ["RMSprop","r"]:
@@ -168,5 +172,3 @@ if __name__ == "__main__":
 
    
     my_net = Critic_net(learning_rate,input_layer,hidden_layers,output_layer,activation_function,optimizer,M,G)
-    
-    

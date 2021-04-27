@@ -1,7 +1,3 @@
-
-
-
-
 import numpy as np
 
 
@@ -32,7 +28,6 @@ def create_tilings(feature_range, number_of_tilings, tiles_per_tiling, offsets):
 
 def create_tiling(feature_range, tiles_per_feature, offset):
     """
-
     :param feature_range: assumes array of shape [start, end]
     :param tiles_per_feature:
     :param offsets:
@@ -87,5 +82,3 @@ def get_flat_state(feature):
     codes = get_tile_coding(feature, tilings)
     flat_state = [item for sublist in codes for item in sublist]
     return flat_state
-
-
